@@ -1,0 +1,113 @@
+﻿@page "/register"
+@using MauiApp3.Models
+@using MauiApp3.Services
+@inject UserService UserService
+@inject NavigationManager NavigationManager
+@layout LoginRegister
+@using MauiApp3.Components.Layout
+
+<div style="font-family: Arial, sans-serif; background-color: #F3F8FC; height: 100vh; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;">
+    <!-- Header Section -->
+    <div style="background-color: #EC993D; display: flex; justify-content: center; align-items: center; padding: 15px;">
+        <img src="image/logo.png" alt="Moneymate Logo" style="height: 50px;">
+    </div>
+
+    <!-- Main Content -->
+    <div style="display: flex; justify-content: center; align-items: center; flex-grow: 1; gap: 180px; padding: 40px 80px;">
+        <!-- Form Section -->
+        <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); width: 500px;">
+            <!-- Back navigation and heading -->
+            <div style="margin-bottom: 20px; display: flex; align-items: center;">
+                <!-- Arrow image that redirects to the homepage -->
+                <a href="/" style="text-decoration: none;">
+                    <img src="image/arrow.png" alt="Back to Home" style="height: 18px; cursor: pointer;margin-top:-9px;">
+                </a>
+                <h2 style="margin-left: 10px; font-size: 22px; color: #333;">Welcome to Moneymate</h2>
+            </div>
+
+            <!-- Input fields for registration -->
+            <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Sign up with email:</p>
+            <input @bind="Username" placeholder="Enter your username" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+
+            <input @bind="Email" placeholder="Enter your email" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+
+            <input @bind="Password" placeholder="Create a password" type="password" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+
+            <!-- Dropdown for currency selection -->
+            <select @bind="currency" id="currency" name="currency" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;" required>
+                <option value="">Select currency type</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+            </select>
+
+            <!-- Feedback message display -->
+            <p style="color: green; font-size: 12px; margin-bottom: 20px;">@message</p>
+            <!-- Sign-up button -->
+            <button @onclick="Registers" style="width: 100%; background-color: #EC993D; color: white; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 15px;">SIGN UP</button>
+        </div>
+
+        <!-- Image Section -->
+        <div style="width: 550px; text-align: center;">
+            <img src="image/register.png" alt="Moneymate Illustration" style="max-width: 100%; height: 500px; margin-top: -130px;">
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <div style="background: #161F36; color: white; text-align: center; padding: 15px;">
+        <p style="margin: 0; font-size: 16px;">Get in Touch</p>
+        <p style="margin: 0; font-size: 14px;">moneymate@gmail.com</p>
+    </div>
+</div>
+
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <p>@message</p>
+}
+
+@code {
+    private string Username = "";
+    private string Password = "";
+    private string Email = "";
+    private string currency = "";
+    private string message = "";
+
+    private List<User> Users = new();
+
+    protected override void OnInitialized()
+    {
+        Users = UserService.LoadUserAccounts();
+    }
+
+    private void Registers()
+    {
+        if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
+        {
+            message = "Username and password are required.";
+            return;
+        }
+
+        if (Users.Any(u => u.user_name == Username))
+        {
+            message = "Username already exists.";
+            return;
+        }
+
+        int user_ID = Users.Any() ? Users.Max(u => u.userId) + 1 : 1;
+
+        var newUser = new User
+            {
+                userId = user_ID,
+                user_name = Username,
+                pass = UserService.GeneratePasswordHash(Password),
+                email = Email,
+                Currency = currency,
+            };
+
+        Users.Add(newUser);
+        UserService.SaveUserAccounts(Users);
+
+        message = "Registration successful. Redirecting to login...";
+        Task.Delay(2000).ContinueWith(_ => NavigationManager.NavigateTo("/"));
+    }
+}

@@ -1,0 +1,316 @@
+﻿@page "/debt"
+@using MauiApp3.Models
+@using MauiApp3.Services
+@inject NavigationManager NavigationManager
+@inject UserService UserService
+
+<style>
+    .container {
+        max-width: 1200px;
+        margin: auto;
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .left-box {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 20px;
+    }
+
+    .right-box {
+        flex: 2;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 20px;
+    }
+
+    label {
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    input {
+        margin-bottom: 15px;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        width: calc(100% - 20px);
+    }
+
+    button {
+        padding: 10px;
+        background-color: #32ADE6;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 140px;
+        align-self: flex-start; /* Align button to the left */
+    }
+
+        button:hover {
+            background-color: #28A0D6;
+        }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        table th,
+        table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #32ADE6;
+            color: white;
+        }
+</style>
+
+<div class="container">
+    <!-- Left Box for Form -->
+    <div class="left-box">
+        <h3>Debt Transactions</h3>
+
+        <label for="receivedDate">Received Date:</label>
+        <input @bind="receivedDate" type="date">
+
+        <label for="dueDate">Due Date:</label>
+        <input @bind="dueDate" type="date">
+
+        <label for="amount">Debt Amount:</label>
+        <input @bind="amount" type="number" placeholder="Enter amount">
+
+        <label for="sourceName">Source Name:</label>
+        <input @bind="sourceName" type="text" placeholder="Enter Source Name">
+
+        <label for="debtTag">Debt Tag:</label>
+        <input @bind="debtTag" type="text" placeholder="Provide tag">
+
+        <label for="debtNote">Debt Note:</label>
+        <input @bind="debtNote" type="text" placeholder="Write a note">
+
+        <button @onclick="AddDebt">Add Debt</button>
+
+        @if (!string.IsNullOrEmpty(Message))
+        {
+            <div class="message">@Message</div>
+        }
+    </div>
+
+    <!-- Right Box for Table -->
+    <div class="right-box">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Due Date</th>
+                    <th>Original Amount</th>
+                    <th>Cleared Amount</th>
+                    <th>Source</th>
+                    <th>Tag</th>
+                    <th>Note</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var debt in Debts)
+                {
+                    <tr>
+                        <td>@debt.date</td>
+                        <td>@debt.due_date</td>
+                        <td>@debt.debt_amount</td>
+                        <td>@debt.cleared_amount</td>
+                        <td>@debt.source</td>
+                        <td>@debt.debt_tag</td>
+                        <td>@debt.debt_note</td>
+                        <td>@debt.debt_status</td>
+                        <td>
+                            @if (debt.debt_status == "Pending")
+                            {
+                                <button class="clear" @onclick="() => ClearDebt(debt)">Clear</button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+
+
+ 
+
+@code {
+    private DateTime? receivedDate;
+    private DateTime? dueDate;
+    private string sourceName = string.Empty;
+    private string debtTag = string.Empty;
+    private string debtNote = string.Empty;
+    private int amount = 0;
+    private string Message = string.Empty;
+
+
+  
+
+    private List<Debt> Debts = new();
+    private List<Debt> filteredDebts = new();
+
+    private List<Transaction> transactions = new();
+    private int totalIncome = 0;
+    private int totalExpenses = 0;
+    private int totalDebts = 0;
+    private int nettotal = 0;
+
+
+
+
+
+    protected override void OnInitialized()
+    {
+        LoadDebts();
+        CalculateTotals();
+
+    }
+
+    private void LoadDebts()
+    {
+        var users = UserService.LoadUserAccounts();
+        var loggedInUser = UserService.GetLoggedInUser();
+
+        if (loggedInUser != null)
+        {
+            var currentUser = users.FirstOrDefault(u => u.userId == loggedInUser.userId);
+            if (currentUser != null)
+            {
+                Debts = currentUser.Debts.ToList();
+                transactions = currentUser.Trans.ToList();
+            }
+        }
+    }
+
+    private void CalculateTotals()
+    {
+        // Safely calculate total income
+        totalIncome = transactions
+            .Where(t => t.trans_type == "Income")
+            .Sum(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0);
+
+        totalExpenses = transactions
+            .Where(t => t.trans_type == "Expense")
+            .Sum(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0);
+
+        totalDebts = Debts
+            .Where(d => d.debt_status == "Pending")
+            .Sum(d => int.TryParse(d.debt_amount, out var amount) ? amount : 0);
+
+        nettotal = totalIncome + totalDebts - totalExpenses;
+    }
+
+
+
+    private void AddDebt()
+    {
+        if (receivedDate == null || dueDate == null || string.IsNullOrEmpty(sourceName) ||
+            string.IsNullOrEmpty(debtTag) || string.IsNullOrEmpty(debtNote) || amount <= 0)
+        {
+            Message = "Please fill all the fields correctly.";
+            return;
+        }
+
+        int debt_id = Debts.Any() ? Debts.Max(d => d.debt_id) + 1 : 1;
+
+        bool result = UserService.AddDebtTransaction(debt_id, receivedDate.Value.ToString("yyyy-MM-dd"),
+           dueDate.Value.ToString("yyyy-MM-dd"), amount.ToString(), debtTag, debtNote, sourceName);
+
+        if (result)
+        {
+            Message = "Debt added successfully!";
+            LoadDebts(); // Refresh the data
+            StateHasChanged(); // Update UI
+        }
+        else
+        {
+            Message = "Failed to add debt.";
+        }
+    }
+
+
+ 
+    private void ClearDebt(Debt debt)
+    {
+        if (!int.TryParse(debt.debt_amount, out var originalDebtAmount))
+        {
+            Message = "Invalid debt amount. Unable to process.";
+            return;
+        }
+
+        int remainingDebt = originalDebtAmount;
+        int clearedAmount = 0;
+
+        var incomeTransactions = transactions
+            .Where(t => t.trans_type == "Income" && int.TryParse(t.trans_amount, out var amt) && amt > 0)
+            .OrderBy(t => t.trans_date)
+            .ToList();
+
+        foreach (var transaction in incomeTransactions)
+        {
+            if (!int.TryParse(transaction.trans_amount, out var transactionAmount)) continue;
+
+            if (remainingDebt <= transactionAmount)
+            {
+                clearedAmount += remainingDebt;
+                transactionAmount -= remainingDebt;
+                transaction.trans_amount = transactionAmount.ToString();
+                remainingDebt = 0;
+                if (transactionAmount == 0)
+                {
+                    transactions.Remove(transaction);
+                }
+                break;
+            }
+            else
+            {
+                clearedAmount += transactionAmount;
+                remainingDebt -= transactionAmount;
+                transaction.trans_amount = "0";
+                transactions.Remove(transaction);
+            }
+        }
+
+        if (remainingDebt > 0)
+        {
+            Message = "Insufficient funds across income transactions to clear the debt.";
+            return;
+        }
+
+        debt.cleared_amount = clearedAmount.ToString(); // Track cleared amount
+        debt.debt_status = "Cleared"; // Update status
+
+        if (UserService.UpdateDebtDetails(debt))
+        {
+            Message = $"Debt of {originalDebtAmount} cleared successfully!";
+            LoadDebts(); // Refresh data
+        }
+        else
+        {
+            Message = "Failed to clear debt. Please try again.";
+            debt.debt_status = "Pending"; // Rollback on failure
+            debt.cleared_amount = "0";
+        }
+
+        CalculateTotals();
+    }
+    }

@@ -1,0 +1,84 @@
+﻿@page "/"
+@using MauiApp3.Models
+@using MauiApp3.Services
+@inject NavigationManager NavigationManager
+@inject UserService UserService
+@layout LoginRegister
+@using MauiApp3.Components.Layout
+@using System.Text.Json;
+
+<div style="font-family: Arial, sans-serif; background-color: #F3F8FC; height: 100vh; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;">
+    <!-- Header Section -->
+    <div style="background-color: #EC993D; display: flex; justify-content: center; align-items: center; padding: 15px;">
+        <img src="image/logo.png" alt="Moneymate Logo" style="height: 50px;">
+    </div>
+
+    <!-- Main Content -->
+    <div style="display: flex; justify-content: center; align-items: center; flex-grow: 1; gap: 180px; padding: 40px 80px;">
+        <!-- Form Section -->
+        <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); width: 500px;">
+            <div style="margin-bottom: 20px; display: flex; align-items: center;">
+                <h2 style="font-size: 22px; color: #333;">Welcome Back</h2>
+            </div>
+
+            <!-- Input fields for registration -->
+            <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Login with username:</p>
+            <input @bind="username" placeholder="Enter your username" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+
+            <input @bind="password" placeholder="Enter your password" type="password" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+
+            <!-- Feedback message display -->
+            <p style="color: green; font-size: 12px; margin-bottom: 20px;">@message</p>
+
+            <button @onclick="Logins" style="width: 100%; background-color: #EC993D; color: white; border: none; padding: 15px; font-size: 18px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-bottom: 15px;">LOGIN</button>
+            <button onclick="location.href='/register'"
+                    style="width: 100%; background-color: #161F36; color: white; border: none; padding: 15px; font-size: 18px; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                SIGN UP
+            </button>
+        </div>
+        <!-- Image Section -->
+        <div style="width: 550px; text-align: center;">
+            <img src="image/register.png" alt="Moneymate Illustration" style="max-width: 100%; height: 500px; margin-top: -130px;">
+        </div>
+    </div>
+
+
+    <!-- Footer Section -->
+    <div style="background: #161F36; color: white; text-align: center; padding: 15px;">
+        <p style="margin: 0; font-size: 16px;">Get in Touch</p>
+        <p style="margin: 0; font-size: 14px;">moneymate@gmail.com</p>
+    </div>
+</div>
+
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <p>@message</p>
+}
+
+@code {
+    private string username = "";
+    private string password = "";
+    private string message = "";
+
+    private List<User> Users = new();
+
+    protected override void OnInitialized()
+    {
+        Users = UserService.LoadUserAccounts();
+    }
+
+    private void Logins()
+    {
+        if (UserService.LoginService(username, password))
+        {
+
+            NavigationManager.NavigateTo("/dashboard");
+        }
+        else
+        {
+            message = "Invalid username or password.";
+        }
+    }
+
+}

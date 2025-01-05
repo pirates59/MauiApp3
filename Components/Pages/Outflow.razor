@@ -1,0 +1,226 @@
+﻿@page "/outflow"
+@using MauiApp3.Models
+@using MauiApp3.Services
+@inject UserService userService
+
+<style>
+    h3 {
+        text-align: center;
+        color: #333;
+    }
+
+    .cards-container {
+        display: flex;
+        margin-bottom: 20px;
+    }
+
+    .card {
+        background-color: rgba(50, 173, 230, 0.25);
+        margin-right: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+        width: 100%;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+        .card p {
+            margin: 5px 0;
+            color:black;
+            text-align: center;
+        }
+
+    .card-value {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: black;
+        margin-top: 5px;
+    }
+
+    .filter-container {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        align-items: center;
+    }
+
+    .tag-filter {
+        margin-right: 10px;
+    }
+
+    .search-container {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+        .search-container label {
+            margin-right: 10px;
+        }
+
+    .styled-button {
+        background-color: rgba(50, 173, 230, 0.25);
+        color: black;
+        border: none;
+        padding: 4px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+
+    .styled-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+        .styled-table thead tr {
+
+            color: black;
+            text-align: left;
+        }
+
+        .styled-table th, .styled-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .styled-table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .styled-table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+    .no-data {
+        text-align: center;
+        font-style: italic;
+        color: #888;
+        margin-top: 20px;
+    }
+</style>
+
+
+
+<div class="cards-container">
+    <div class="card">
+        <p><strong>Total Outflows </strong></p>
+        <p class="card-value">@totalExpense</p>
+    </div>
+    
+</div>
+
+<div class="filter-container">
+    <div class="tag-filter">
+        <label for="tagFilter">Filter by Tag:</label>
+        <select id="tagFilter" @onchange="FilterByTag">
+            <option value="">All</option>
+            @foreach (var tag in expenseTransactions.Select(t => t.trans_tag).Distinct())
+            {
+                <option value="@tag">@tag</option>
+            }
+        </select>
+    </div>
+    <div class="search-container">
+        <label for="noteSearch">Search by Note:</label>
+        <input type="text" id="noteSearch" @bind="noteSearch" />
+        <button class="styled-button" @onclick="SearchByNote">Search</button>
+    </div>
+</div>
+
+@if (filteredTransactions.Any())
+{
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Tag</th>
+                <th>Note</th>
+                <th>Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var transaction in filteredTransactions)
+            {
+                <tr>
+                   
+                    
+                    <td>@transaction.trans_date</td>
+                    <td>@transaction.trans_amount</td>
+                    <td>@transaction.trans_tag</td>
+                    <td>@transaction.trans_note</td>
+                    <td>@transaction.trans_type</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p class="no-data">No expense transactions found.</p>
+}
+
+
+@code {
+    private List<Transaction> expenseTransactions = new List<Transaction>();
+    private List<Transaction> filteredTransactions = new List<Transaction>();
+    private int totalExpense = 0;
+    private int averageExpense = 0;
+    private string noteSearch = string.Empty;
+
+
+    protected override void OnInitialized()
+    {
+        var Users = userService.LoadUserAccounts();
+        var loggedInUser = userService.GetLoggedInUser();
+
+        if (loggedInUser != null)
+        {
+            // Find the current user in the loaded users list
+            var currentUser = Users.FirstOrDefault(u => u.userId == loggedInUser.userId);
+
+            if (currentUser != null)
+            {
+                expenseTransactions = currentUser.Trans
+                   .Where(t => t.trans_type == "Expense")
+                   .ToList();
+
+                filteredTransactions = expenseTransactions;
+
+                totalExpense = expenseTransactions
+                 .Sum(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0);
+
+                averageExpense = expenseTransactions.Any()
+                    ? totalExpense / expenseTransactions.Count
+                    : 0;
+            }
+        }
+    }
+
+    private void FilterByTag(ChangeEventArgs e)
+    {
+        var selectedTag = e.Value?.ToString();
+        if (!string.IsNullOrEmpty(selectedTag))
+        {
+            filteredTransactions = expenseTransactions
+                .Where(t => t.trans_tag == selectedTag)
+                .ToList();
+        }
+        else
+        {
+            filteredTransactions = expenseTransactions;
+        }
+    }
+
+    private void SearchByNote()
+    {
+        filteredTransactions = expenseTransactions
+            .Where(t => string.IsNullOrEmpty(noteSearch) ||
+                        (t.trans_note?.IndexOf(noteSearch, StringComparison.OrdinalIgnoreCase) >= 0))
+            .ToList();
+    }
+
+}

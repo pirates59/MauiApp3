@@ -1,0 +1,331 @@
+﻿@page "/dashboard"
+@inject NavigationManager NavigationManager
+@using MauiApp3.Services
+@inject UserService UserService
+@using MauiApp3.Models
+
+<style>
+    .container {
+        width: 90%;
+        margin: 20px auto;
+    }
+
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .card {
+        width: 23%;
+        margin: 10px 0;
+        border-radius: 3px;
+        box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .card-header {
+        padding: 10px;
+        font-weight: bold;
+        border: none;
+        background-color: inherit;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    .card-title {
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .total-card {
+        background-color: rgba(50, 173, 230, 0.25);
+        color: white;
+    }
+
+    .income-card {
+        background-color: rgba(50, 173, 230, 0.25);
+        color: white;
+    }
+
+    .expense-card {
+        background-color: rgba(50, 173, 230, 0.25);
+        color: white;
+    }
+
+    .debts-card {
+        background-color: rgba(50, 173, 230, 0.25);
+        color: white;
+    }
+
+    .pending-debts-card {
+        background-color: rgba(50, 173, 230, 0.25);
+        color: white;
+    }
+
+    .cleared-debts-card {
+        background-color: rgba(50, 173, 230, 0.25);
+        color: white;
+    }
+
+    .transactions-card {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .table-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        margin: 20px 0;
+    }
+
+    .table-wrapper {
+        width: 100%;
+        background-color: rgba(50, 173, 230, 0.25);
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+        padding: 12px;
+        text-align: left;
+        border: 1px solid #ddd;
+        font-size: 1rem;
+    }
+
+    th {
+        background-color: rgba(50, 173, 230, 0.25);
+        color: white;
+        font-weight: bold;
+    }
+
+   
+    .table-wrapper:nth-child(2) th {
+        color: white;
+    }
+
+    .filter-dropdown {
+        margin-bottom: 10px;
+        padding: 5px;
+        font-size: 1rem;
+    }
+
+    h3 {
+        font-size: 1.8rem;
+        margin-bottom: 15px;
+        color: white;
+    }
+</style>
+
+@if (currentUser != null)
+{
+    <p>Welcome, @currentUser.user_name!</p>
+}
+
+<div class="container">
+    <div class="row">
+        <!-- Total Transactions Card -->
+        <div class="card total-card">
+            <div class="card-header">Total Transactions</div>
+            <div class="card-body">
+                <h5 class="card-title">@totalTransactions</h5>
+            </div>
+        </div>
+
+        <!-- Total Amount Card -->
+        <div class="card total-card">
+            <div class="card-header">Total Amount</div>
+            <div class="card-body">
+                <h5 class="card-title">$@totalAmount</h5>
+            </div>
+        </div>
+
+        <!-- Income Card -->
+        <div class="card income-card">
+            <div class="card-header">Cash Inflow</div>
+            <div class="card-body">
+                <h5 class="card-title">$@totalIncome</h5>
+            </div>
+        </div>
+
+        <!-- Expense Card -->
+        <div class="card expense-card">
+            <div class="card-header">Cash Outflow</div>
+            <div class="card-body">
+                <h5 class="card-title">$@totalExpense</h5>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="card debts-card">
+            <div class="card-header">Debts</div>
+            <div class="card-body">
+                <h5 class="card-title">$@totalDebts</h5>
+            </div>
+        </div>
+        <div class="card pending-debts-card">
+            <div class="card-header">Remaining Debts</div>
+            <div class="card-body">
+                <h5 class="card-title">$@pendingDebts</h5>
+            </div>
+        </div>
+        <div class="card cleared-debts-card">
+            <div class="card-header">Cleared Debt</div>
+            <div class="card-body">
+                <h5 class="card-title">$@clearedDebts</h5>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tables Section -->
+    <div class="table-container">
+        <!-- Transactions Table -->
+        <div class="table-wrapper transactions-card">
+            <h3>Transactions</h3>
+            <select @onchange="UpdateFilter" class="filter-dropdown">
+                <option value="All">All</option>
+                <option value="Highest">Highest</option>
+                <option value="Lowest">Lowest</option>
+            </select>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Tag</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var transaction in filteredTransactions)
+                    {
+                        <tr>
+                            <td>@transaction.trans_date</td>
+                            <td>$@transaction.trans_amount</td>
+                            <td>@transaction.trans_tag</td>
+                            <td>@transaction.trans_type</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pending Debts Table -->
+        <div class="table-wrapper">
+            <h3>Pending Debts</h3>
+            <select @onchange="UpdateFilter" class="filter-dropdown">
+                <option value="All">All</option>
+                <option value="Highest">Highest</option>
+                <option value="Lowest">Lowest</option>
+            </select>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var debt in pendingDebtsList)
+                    {
+                        <tr>
+                            <td>@debt.source</td>
+                            <td>$@debt.debt_amount</td>
+                            <td>@debt.debt_status</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+    private User? currentUser;
+    private int totalTransactions = 0;
+    private int totalAmount = 0;
+    private int totalIncome = 0;
+    private int totalExpense = 0;
+    private int totalDebts = 0;
+    private int pendingDebts = 0;
+    private int clearedDebts = 0;
+
+    private List<Transaction> filteredTransactions = new();
+    private List<Debt> pendingDebtsList = new();
+    private List<Debt> clearedDebtsList = new();
+    private string currentFilter = "All";
+
+    protected override void OnInitialized()
+    {
+        currentUser = UserService.GetLoggedInUser();
+
+        if (currentUser != null)
+        {
+            totalTransactions = currentUser.Trans.Count;
+
+            totalIncome = currentUser.Trans
+                .Where(t => t.trans_type == "Income")
+                .Sum(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0);
+
+            totalExpense = currentUser.Trans
+                .Where(t => t.trans_type == "Expense")
+                .Sum(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0);
+
+            totalDebts = currentUser.Debts
+                .Sum(d => int.TryParse(d.debt_amount, out var amount) ? amount : 0);
+
+            pendingDebts = currentUser.Debts
+                .Where(d => d.debt_status == "Pending")
+                .Sum(d => int.TryParse(d.debt_amount, out var amount) ? amount : 0);
+
+            clearedDebts = currentUser.Debts
+                .Where(d => d.debt_status == "Cleared")
+                .Sum(d => int.TryParse(d.debt_amount, out var amount) ? amount : 0);
+
+            totalAmount = totalIncome + pendingDebts - totalExpense;
+
+            filteredTransactions = currentUser.Trans.Take(5).ToList();
+            pendingDebtsList = currentUser.Debts.Where(d => d.debt_status == "Pending").ToList();
+            clearedDebtsList = currentUser.Debts.Where(d => d.debt_status == "Cleared").ToList();
+        }
+    }
+
+    private void UpdateFilter(ChangeEventArgs e)
+    {
+        currentFilter = e.Value?.ToString() ?? "All";
+
+        if (currentFilter == "Highest")
+        {
+            filteredTransactions = currentUser?.Trans
+                .OrderByDescending(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0)
+                .Take(5)
+                .ToList() ?? new List<Transaction>();
+        }
+        else if (currentFilter == "Lowest")
+        {
+            filteredTransactions = currentUser?.Trans
+                .OrderBy(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0)
+                .Take(5)
+                .ToList() ?? new List<Transaction>();
+        }
+        else
+        {
+            filteredTransactions = currentUser?.Trans
+                .Take(5)
+                .ToList() ?? new List<Transaction>();
+        }
+    }
+}

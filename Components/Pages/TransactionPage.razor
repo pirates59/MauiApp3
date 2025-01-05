@@ -1,0 +1,164 @@
+﻿@page "/transaction"
+@using MauiApp3.Models
+@using MauiApp3.Services
+@inject NavigationManager NavigationManager
+@inject UserService UserService
+
+<style>
+    .container {
+        background-color: rgba(50, 173, 230, 0.25); 
+
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 8px 10px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        margin: auto;
+        margin-top: 50px;
+        height:100%;
+        
+    }
+
+    h3 {
+        text-align: center;
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .form input, .form select {
+        display: block;
+        width: 100%;
+        margin-bottom: 20px;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 1rem;
+        background-color: #fff;
+    }
+
+        .form input:focus, .form select:focus {
+            border-color: #007BFF;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+    .form button {
+        display: inline-block;
+        width: 20%;
+        padding: 10px;
+        background-color: #EC993D;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+        .form button:hover {
+            background-color: #EC993D;
+        }
+
+        .form button:active {
+            background-color: #EC993D;
+        }
+
+    .message {
+        color: green;
+        font-size: 0.9rem;
+        margin-top: 10px;
+    }
+</style>
+
+
+<div class="container">
+    <h3>Transactions</h3>
+    <div class="form">
+        <input @bind="Date" placeholder="Enter date" type="date">
+        <input @bind="amount" placeholder="Provide Amount" type="text">
+        <select @bind="type">
+            <option value="">Choose Type</option>
+            <option value="Income">Income</option>
+            <option value="Expense">Expense</option>
+        </select>
+        <input @bind="tag" placeholder="Provide a tag" type="text">
+        <input @bind="note" placeholder="Write a note" type="text">
+        <button @onclick="AddTransaction">Add Transaction</button>
+        @if (!string.IsNullOrEmpty(Message))
+        {
+                <div class="message">@Message</div>
+        }
+    </div>
+</div>
+
+@code {
+    private DateTime? Date;
+    private string amount = "";
+    private string type = "";
+    private string tag = "";
+    private string note = "";
+    private string Message = "";
+    private string StringDate = "";
+
+    private List<Transaction> Transaction = new();
+    private User? currentUser;
+
+    protected override void OnInitialized()
+    {
+        currentUser = UserService.GetLoggedInUser();
+        if (currentUser == null)
+        {
+            Message = "Please log in to add transactions.";
+        }
+    }
+    private void AddTransaction()
+    {
+        if (string.IsNullOrWhiteSpace(amount) ||
+            string.IsNullOrWhiteSpace(type) || string.IsNullOrWhiteSpace(tag) ||
+            string.IsNullOrWhiteSpace(note))
+        {
+            Message = "All fields are required. Please fill them correctly.";
+            return;
+        }
+
+        StringDate = Date.Value.ToString("yyyy-MM-dd");
+
+        var newTransaction = new Transaction
+            {
+                trans_date = StringDate,
+                trans_amount = amount,
+                trans_type = type,
+                trans_tag = tag,
+                trans_note = note
+            };
+
+        try
+        {
+            bool result = UserService.addTransaction(newTransaction);
+
+            if (result)
+            {
+                Message = "Transaction added successfully!";
+                ClearFields();
+            }
+            else
+            {
+                Message = "Failed to add transaction. Please try again.";
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            Message = "An error occurred while adding the transaction.";
+        }
+    }
+
+    private void ClearFields()
+    {
+
+        amount = "";
+        type = "";
+        tag = "";
+        note = "";
+    }
+}

@@ -1,0 +1,45 @@
+﻿<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <img src="image/logo.png" alt="Moneymate Logo" style="height: 50px;">
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable nav" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="d-flex flex-column h-100">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="dashboard" Match="NavLinkMatch.All">
+                <img src="image/dash.png" alt="Moneymate Logo" style="height: 18px;"> Dashboard
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="transaction">
+                <img src="image/trans.png" alt="Moneymate Logo" style="height: 18px;"> Add Transactions
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="inflow">
+                <img src="image/inflow.png" alt="Moneymate Logo" style="height: 20px;"> Cash Inflow
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="outflow">
+                <img src="image/outflow.png" alt="Moneymate Logo" style="height: 20px;"> Cash Outflow
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="debt">
+                <img src="image/debt.png" alt="Moneymate Logo" style="height: 20px;"> Debt
+            </NavLink>
+        </div>
+        <div class="nav-item px-3 mt-auto">
+            <NavLink class="nav-link" href="logout">
+                <a href="/">
+                    <img src="image/logout.png" alt="Moneymate Logo" style="height: 20px;"> Logout
+                </a>
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
