@@ -1,4 +1,4 @@
-﻿@page "/outflow"
+@page "/outflow"
 @using MauiApp3.Models
 @using MauiApp3.Services
 @inject UserService userService
@@ -26,7 +26,7 @@
 
         .card p {
             margin: 5px 0;
-            color:black;
+            color: black;
             text-align: center;
         }
 
@@ -76,7 +76,6 @@
     }
 
         .styled-table thead tr {
-
             color: black;
             text-align: left;
         }
@@ -109,7 +108,7 @@
         <p><strong>Total Outflows </strong></p>
         <p class="card-value">@totalExpense</p>
     </div>
-    
+
 </div>
 
 <div class="filter-container">
@@ -146,8 +145,8 @@
             @foreach (var transaction in filteredTransactions)
             {
                 <tr>
-                   
-                    
+
+
                     <td>@transaction.trans_date</td>
                     <td>@transaction.trans_amount</td>
                     <td>@transaction.trans_tag</td>

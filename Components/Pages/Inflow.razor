@@ -1,4 +1,4 @@
-﻿@page "/inflow"
+@page "/inflow"
 @using MauiApp3.Models
 @using MauiApp3.Services
 @inject UserService userService
@@ -103,60 +103,60 @@
     }
 </style>
 
-        <div class="cards-container">
-            <div class="card">
-                <p><strong>Total Inflows:</strong></p>
-                <p class="card-value">@totalIncome</p>
-            </div>
-           
-        </div>
-
-    <div class="filter-container">
-        <div class="tag-filter">
-            <label for="tagFilter">Filter by Tag:</label>
-            <select id="tagFilter" @onchange="FilterByTag">
-                <option value="">All</option>
-                @foreach (var tag in incomeTransactions.Select(t => t.trans_tag).Distinct())
-                {
-                    <option value="@tag">@tag</option>
-                }
-            </select>
-        </div>
-        <div class="search-container">
-            <label for="noteSearch">Search by Note:</label>
-            <input type="text" id="noteSearch" @bind="noteSearch" />
-            <button class="styled-button" @onclick="SearchByNote">Search</button>
-        </div>
+<div class="cards-container">
+    <div class="card">
+        <p><strong>Total Inflows:</strong></p>
+        <p class="card-value">@totalIncome</p>
     </div>
+
+</div>
+
+<div class="filter-container">
+    <div class="tag-filter">
+        <label for="tagFilter">Filter by Tag:</label>
+        <select id="tagFilter" @onchange="FilterByTag">
+            <option value="">All</option>
+            @foreach (var tag in incomeTransactions.Select(t => t.trans_tag).Distinct())
+            {
+                <option value="@tag">@tag</option>
+            }
+        </select>
+    </div>
+    <div class="search-container">
+        <label for="noteSearch">Search by Note:</label>
+        <input type="text" id="noteSearch" @bind="noteSearch" />
+        <button class="styled-button" @onclick="SearchByNote">Search</button>
+    </div>
+</div>
 @if (filteredTransactions.Any())
 {
-        <table class="styled-table">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Amount</th>
-                    <th>Tag</th>
-                    <th>Note</th>
-                     <th>Type</th>
-                </tr>
-            </thead>
-            <tbody>
-            @foreach (var transaction in incomeTransactions)
-        {
+    <table class="styled-table">
+        <thead>
             <tr>
-                            <td>@transaction.trans_date</td>
-                            <td>@transaction.trans_amount</td>
-                            <td>@transaction.trans_tag</td>
-                            <td>@transaction.trans_note</td>
-                            <td>@transaction.trans_type</td>
-                        </tr>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Tag</th>
+                <th>Note</th>
+                <th>Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var transaction in incomeTransactions)
+            {
+                <tr>
+                    <td>@transaction.trans_date</td>
+                    <td>@transaction.trans_amount</td>
+                    <td>@transaction.trans_tag</td>
+                    <td>@transaction.trans_note</td>
+                    <td>@transaction.trans_type</td>
+                </tr>
             }
-            </tbody>
-        </table>
+        </tbody>
+    </table>
 }
 else
 {
-        <p class="no-data">No income transactions found.</p>
+    <p class="no-data">No income transactions found.</p>
 }
 
 

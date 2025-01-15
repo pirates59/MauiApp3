@@ -6,16 +6,14 @@
 
 <style>
     .container {
-        background-color: rgba(50, 173, 230, 0.25); 
-
+        background-color: rgba(50, 173, 230, 0.25);
         padding: 20px;
         border-radius: 8px;
         box-shadow: 0 8px 10px rgba(0, 0, 0, 0.1);
         width: 100%;
         margin: auto;
         margin-top: 50px;
-        height:100%;
-        
+        height: 100%;
     }
 
     h3 {
@@ -86,7 +84,7 @@
         <button @onclick="AddTransaction">Add Transaction</button>
         @if (!string.IsNullOrEmpty(Message))
         {
-                <div class="message">@Message</div>
+            <div class="message">@Message</div>
         }
     </div>
 </div>

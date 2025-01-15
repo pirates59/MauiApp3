@@ -11,7 +11,7 @@ namespace MauiApp3.Models
     {
         public int userId { get; set; }
         public string user_name { get; set; }
-        public string pass { get; set; } 
+        public string pass { get; set; }
         public string email { get; set; }
         public String Currency { get; set; }
 

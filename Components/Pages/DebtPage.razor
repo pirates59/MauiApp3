@@ -151,7 +151,7 @@
 
 
 
- 
+
 
 @code {
     private DateTime? receivedDate;
@@ -163,7 +163,7 @@
     private string Message = string.Empty;
 
 
-  
+
 
     private List<Debt> Debts = new();
     private List<Debt> filteredDebts = new();
@@ -248,7 +248,7 @@
     }
 
 
- 
+
     private void ClearDebt(Debt debt)
     {
         if (!int.TryParse(debt.debt_amount, out var originalDebtAmount))
@@ -313,4 +313,4 @@
 
         CalculateTotals();
     }
-    }
+}

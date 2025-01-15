@@ -1,7 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
+<<<<<<< HEAD
 VisualStudioVersion = 17.12.35527.113
+=======
+VisualStudioVersion = 17.12.35527.113 d17.12
+>>>>>>> 4699adf829762909310a3f40986b475ee78cc90b
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MauiApp3", "MauiApp3.csproj", "{F31C6758-CF0B-4FED-8848-95642CD0D740}"
 EndProject

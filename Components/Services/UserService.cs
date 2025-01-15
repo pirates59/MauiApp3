@@ -17,7 +17,7 @@ namespace MauiApp3.Services
         {
             if (!File.Exists(UserFilePath))
             {
-                return new List<User>();  
+                return new List<User>();
 
             }
             var jsonContent = File.ReadAllText(UserFilePath);

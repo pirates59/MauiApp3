@@ -50,17 +50,17 @@
 
 .nav-item img {
     margin-right: 10px;
-    vertical-align: middle; 
+    vertical-align: middle;
 }
 
 .nav-item a {
     display: flex;
-    align-items: center; 
-    text-decoration: none; 
+    align-items: center;
+    text-decoration: none;
 }
 
 .nav-item {
-    gap: 5px; 
+    gap: 5px;
 }
 
 
@@ -118,7 +118,7 @@
         text-decoration: none;
     }
 
-   
+
 
 
 @media (min-width: 641px) {
