@@ -2,19 +2,23 @@
 @using MauiApp3.Models
 @using MauiApp3.Services
 @inject UserService userService
+
 <style>
 
+    /* Styling for the cards container displaying statistics */
     .cards-contain {
         display: flex;
         margin-bottom: 20px;
         width: 100%;
     }
 
+    /* Styling for headings */
     h3 {
         text-align: center;
         color: #333;
     }
 
+    /* Styling for content inside each card */
     .content {
         display: flex;
         flex-direction: column;
@@ -22,6 +26,7 @@
         margin-bottom: 5px;
     }
 
+    /* Card design with background, padding, and shadow */
     .card {
         background-color: rgba(50, 173, 230, 0.25);
         margin-right: 10px;
@@ -32,18 +37,73 @@
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
-
+    /* Styling for content images inside cards */
     .content img {
         margin-bottom: 5px;
     }
 
+    /* Styling for the filter section including date and dropdown filters */
+    .filter {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
 
+        /* Styling for filter labels */
+        .filter label {
+            font-weight: bold;
+            margin-right: 10px;
+            color: #333;
+        }
+
+        /* Styling for date input fields and dropdown filters */
+        .filter input[type="date"], .filter select {
+            padding: 8px;
+            font-size: 1rem;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            margin-right: 15px;
+            transition: border-color 0.3s ease;
+        }
+
+            /* Styling for focused date inputs and dropdown */
+            .filter input[type="date"]:focus, .filter select:focus {
+                border-color: #50ade6;
+                outline: none;
+            }
+
+    /* Styling for the filter button */
+    .styled-button {
+        background-color: #50ade6;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+        /* Hover effect for the filter button */
+        .styled-button:hover {
+            background-color: #1c80c4;
+        }
+
+        /* Active effect for the filter button */
+        .styled-button:active {
+            background-color: #1b6fa1;
+        }
+
+    /* Styling for text inside cards */
     .card p {
         margin: 5px 0;
         color: black;
         text-align: center;
     }
 
+    /* Styling for value display inside cards */
     .value {
         font-size: 1.2em;
         font-weight: bold;
@@ -51,6 +111,7 @@
         margin-top: 5px;
     }
 
+    /* Container for displaying the filter options */
     .container {
         background-color: rgba(50, 173, 230, 0.25);
         padding: 20px;
@@ -58,26 +119,22 @@
         box-shadow: 0 8px 10px rgba(0, 0, 0, 0.1);
         width: 100%;
         margin: auto;
-        margin-top: 50px;
+        margin-top: 20px;
         height: 100%;
     }
 
-    .filter {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 20px;
-        align-items: center;
-    }
-
+    /* Styling for tags used in filtering */
     .tag {
         margin-right: 10px;
     }
 
+    /* Styling for search bar container */
     .search-container {
         display: flex;
         align-items: center;
     }
 
+    /* Styling for the search input */
     .search-input {
         flex: 1;
         border: none;
@@ -87,6 +144,7 @@
         font-size: 16px;
     }
 
+    /* Styling for the search button */
     .search-button {
         background: transparent;
         border: none;
@@ -96,50 +154,64 @@
         justify-content: center;
     }
 
+        /* Styling for search button icon */
         .search-button img {
             height: 18px;
             width: 18px;
         }
 
-
+    /* Alternate button style for different actions */
     .styled-button {
-        background-color: rgba(50, 173, 230, 0.25);
-        color: black;
+        background-color: #EC993D;
+        color: white;
         border: none;
-        padding: 4px;
-        border-radius: 5px;
+        padding: 8px;
+        border-radius: 6px;
         cursor: pointer;
-        transition: background-color 0.3s ease;
     }
 
+    /* Styling for dropdown filters */
+    .dropdown {
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+    }
 
+    /* Styling for the table displaying filtered transactions */
     .table-style {
         width: 100%;
         border-collapse: collapse;
         margin-top: 20px;
     }
 
+        /* Styling for table header */
         .table-style thead tr {
             color: black;
             text-align: left;
         }
 
+        /* Styling for table data and header cells */
         .table-style th, .table-style td {
             padding: 10px;
             border: 1px solid #ddd;
         }
 
-
+        /* Hover effect for table rows */
         .table-style tbody tr:hover {
             background-color: #f1f1f1;
         }
 
+    /* Styling for no data message */
     .data {
         text-align: center;
         color: #888;
         margin-top: 20px;
     }
+
 </style>
+
+<!-- Display of Total Inflows in a card format -->
 <div class="cards-contain">
     <div class="card">
         <div class="content">
@@ -150,27 +222,42 @@
     </div>
 </div>
 
-<div class="filter">
-    <label for="startDate">Start Date:</label>
-    <input type="date" id="startDate" @bind="startDate" />
-
-    <label for="endDate">End Date:</label>
-    <input type="date" id="endDate" @bind="endDate" />
-
-    <button class="styled-button" @onclick="FilterByDateRange">Filter by Date Range</button>
-
-    <select @onchange="UpdateFilter" class="filter-dropdown">
-        <option value="All">All</option>
-        <option value="Highest">Highest</option>
-        <option value="Lowest">Lowest</option>
-    </select>
-</div>
-
+<!-- Filtering section with start and end dates, and a dropdown filter -->
 <div class="container">
     <div class="filter">
         <div class="tag">
+
+            <!-- Date range filter inputs -->
+            <label for="start_date">Start Date:</label>
+            <input type="date" id="start_date" @bind="start_date" />
+
+            <label for="end_date">End Date:</label>
+            <input type="date" id="end_date" @bind="end_date" />
+
+            <!-- Button to trigger date filtering -->
+            <button class="styled-button" @onclick="FilterByDate">Filter Date</button>
+        </div>
+
+        <!-- Dropdown filter for transaction type -->
+        <div class="search-container">
+            <label for="typeFilter">Filter:</label>
+            <select @onchange="updateFilter" class="dropdown">
+                <option value="All">All</option>
+                <option value="Highest">Highest</option>
+                <option value="Lowest">Lowest</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<!-- Section for Tag Filter and Notes Search -->
+<div class="container">
+    <div class="filter">
+        <div class="tag">
+            <!-- Dropdown for filtering by transaction tag -->
             <label for="Filter">Filter by Tag:</label>
-            <select id="Filter" @onchange="FilterTag">
+            <select id="Filter" @onchange="TagFilter" class="dropdown">
+
                 <option value="">All</option>
                 @foreach (var tag in incomeTrans.Select(t => t.trans_tag).Distinct())
                 {
@@ -179,13 +266,16 @@
             </select>
         </div>
         <div class="search-container">
+            <!-- Input field for searching by note -->
             <input type="text" id="notes" placeholder="Search by note" @bind="notes" />
+            <!-- Search button -->
             <button class="search-button" @onclick="SearchNote">
                 <img src="image/search.png" alt="Search" />
             </button>
         </div>
     </div>
 
+    <!-- Table for displaying filtered income transactions -->
     @if (filterTrans.Any())
     {
         <table class="table-style">
@@ -214,26 +304,30 @@
     }
     else
     {
+        <!-- Message shown if no transactions are found -->
         <p class="data">No income transactions found.</p>
     }
 </div>
 
+<!-- Code section containing methods for managing state and logic -->
 @code {
     private List<Transaction> incomeTrans = new();
     private List<Transaction> filterTrans = new();
     private int Income = 0;
-      private bool isSortAscending = true;
-    private DateTime? startDate;
-    private DateTime? endDate;
+    private bool sortAscending = true;
+    private DateTime? start_date;
+    private DateTime? end_date;
     private string currentFilter = "All";
     private string notes = string.Empty;
 
+    // Method to fetch user data and set up transactions
     protected override void OnInitialized()
     {
-        LoadUserData();
+        UserData();
     }
 
-    private void LoadUserData()
+    // Method to retrieve logged-in user's income transactions
+    private void UserData()
     {
         var loggedInUser = userService.GetLoggedInUser();
         if (loggedInUser != null)
@@ -249,7 +343,8 @@
         }
     }
 
-    private void UpdateFilter(ChangeEventArgs e)
+    // Method to apply filtering by transaction type (Highest, Lowest, All)
+    private void updateFilter(ChangeEventArgs e)
     {
         currentFilter = e.Value?.ToString() ?? "All";
 
@@ -273,12 +368,13 @@
         }
     }
 
-    private void FilterByDateRange()
+    // Method to filter transactions by date range
+    private void FilterByDate()
     {
-        if (startDate.HasValue && endDate.HasValue)
+        if (start_date.HasValue && end_date.HasValue)
         {
             filterTrans = incomeTrans
-                .Where(t => DateTime.TryParse(t.trans_date, out var date) && date >= startDate && date <= endDate)
+                .Where(t => DateTime.TryParse(t.trans_date, out var date) && date >= start_date && date <= end_date)
                 .ToList();
 
             Income = filterTrans
@@ -290,9 +386,10 @@
         }
     }
 
-    private void ToggleSortByDate()
+    // Method to sort transactions by date
+    private void SortByDate()
     {
-        if (isSortAscending)
+        if (sortAscending)
         {
             filterTrans = filterTrans.OrderBy(t => DateTime.Parse(t.trans_date)).ToList();
         }
@@ -300,10 +397,11 @@
         {
             filterTrans = filterTrans.OrderByDescending(t => DateTime.Parse(t.trans_date)).ToList();
         }
-        isSortAscending = !isSortAscending;
+        sortAscending = !sortAscending;
     }
 
-    private void FilterTag(ChangeEventArgs e)
+    // Method to filter transactions by tag
+    private void TagFilter(ChangeEventArgs e)
     {
         var selectedTag = e.Value?.ToString();
         if (!string.IsNullOrEmpty(selectedTag))
@@ -318,11 +416,11 @@
         }
     }
 
+    // Method to search transactions by note content
     private void SearchNote()
     {
         filterTrans = incomeTrans
-            .Where(t => string.IsNullOrEmpty(notes) ||
-                        t.trans_note?.IndexOf(notes, StringComparison.OrdinalIgnoreCase) >= 0)
+            .Where(t => t.trans_note.Contains(notes, StringComparison.OrdinalIgnoreCase))
             .ToList();
     }
 }

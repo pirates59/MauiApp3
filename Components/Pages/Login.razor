@@ -30,7 +30,10 @@
             <!-- Feedback message display -->
             <p style="color: green; font-size: 12px; margin-bottom: 20px;">@message</p>
 
+            <!-- Login button -->
             <button @onclick="Logins" style="width: 100%; background-color: #EC993D; color: white; border: none; padding: 15px; font-size: 18px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-bottom: 15px;">LOGIN</button>
+
+            <!-- Redirect to registration page button -->
             <button onclick="location.href='/register'"
                     style="width: 100%; background-color: #161F36; color: white; border: none; padding: 15px; font-size: 18px; border-radius: 8px; cursor: pointer; font-weight: bold;">
                 SIGN UP
@@ -50,35 +53,36 @@
     </div>
 </div>
 
-
 @if (!string.IsNullOrEmpty(message))
 {
     <p>@message</p>
 }
 
 @code {
-    private string username = "";
-    private string password = "";
-    private string message = "";
+    private string username = "";  // Stores the username input by the user
+    private string password = "";  // Stores the password input by the user
+    private string message = "";   // Stores feedback messages for the user
 
-    private List<User> Users = new();
+    private List<User> Users = new();  // List to store all users
 
     protected override void OnInitialized()
     {
+        // Initialize the users list by fetching all accounts from the UserService
         Users = UserService.UserAccounts();
     }
 
     private void Logins()
     {
+        // Check if the login credentials are valid using the LoginService method
         if (UserService.LoginService(username, password))
         {
-
+            // Navigate to the dashboard page if login is successful
             NavigationManager.NavigateTo("/dashboard");
         }
         else
         {
+            // Display an error message if login fails
             message = "Invalid username or password.";
         }
     }
-
 }

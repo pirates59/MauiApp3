@@ -5,6 +5,7 @@
 @inject UserService UserService
 
 <style>
+    /* Styling for the container */
     .container {
         background-color: rgba(50, 173, 230, 0.25);
         padding: 20px;
@@ -23,34 +24,36 @@
         color: #333;
     }
 
+    /* Styling for the form */
     .form {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
     }
 
-    .form input, .form select {
-        display: block;
-        width: 100%;
-        margin-bottom: 20px;
-        padding: 12px;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        font-size: 1rem;
-        background-color: #fff;
-    }
-
-        .form input:focus, .form select:focus {
-            border-color: #007BFF;
-            outline: none;
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        /* Input and select styling */
+        .form input, .form select {
+            display: block;
+            width: 100%;
+            margin-bottom: 20px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: #fff;
         }
 
+            /* Focus styling for inputs and select */
+            .form input:focus, .form select:focus {
+                border-color: #007BFF;
+                outline: none;
+                box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+            }
 
-
+        /* Button styling */
         .form button {
-            margin-left: auto; 
-            width: auto; 
+            margin-left: auto;
+            width: auto;
             padding: 10px 20px;
             background-color: #EC993D;
             color: white;
@@ -59,137 +62,86 @@
             font-size: 1rem;
             cursor: pointer;
             font-weight: bold;
-            .form button:hover {
-            background-color: #EC993D;
         }
 
-    .form button:hover {
-        background-color: #d27c32;
-    }
+            /* Hover and active states for the button */
+            .form button:hover {
+                background-color: #d27c32;
+            }
 
-    .form button:active {
-        background-color: #b8692a;
-    }
+            .form button:active {
+                background-color: #b8692a;
+            }
 
+    /* Styling for success or error messages */
     .messages {
         color: green;
         font-size: 0.9rem;
         margin-top: 10px;
     }
 </style>
-<div class="search-container">
-    <label for="noteSearch">Search by Note:</label>
-    <input type="text" id="noteSearch" @bind="noteSearch" />
-    <button class="styled-button" @onclick="SearchByNote">Search</button>
-
-    <label for="startDate">Start Date:</label>
-    <input type="date" id="startDate" @bind="startDate" />
-
-    <label for="endDate">End Date:</label>
-    <input type="date" id="endDate" @bind="endDate" />
-
-    <button class="styled-button" @onclick="FilterByDateRange">Filter by Date Range</button>
-</div>
 
 <div class="container">
-    <h3>Transactions</h3>
+    <h3>Transaction Page</h3>
     <div class="form">
-        <input @bind="Date" placeholder="Select the date" type="date">
-        <input @bind="amount" placeholder="Enter the amount" type="text">
+        <!-- Input for transaction date -->
+        <input @bind="Date" placeholder="Enter date" type="date">
+        <!-- Input for transaction amount -->
+        <input @bind="amount" placeholder="Provide Amount" type="text">
+        <!-- Dropdown to select transaction type -->
         <select @bind="type">
-            <option value="">Choose type</option>
+            <option value="">Choose Type</option>
             <option value="Income">Income</option>
             <option value="Expense">Expense</option>
         </select>
-        <input @bind="tag" placeholder="Enter a tag" type="text">
-        <input @bind="note" placeholder="Enter a note" type="text">
-        <button @onclick="AddTransactions">Add Transaction</button>
+        <!-- Input for transaction tag -->
+        <input @bind="tag" placeholder="Provide a tag" type="text">
+        <!-- Input for transaction note -->
+        <input @bind="note" placeholder="Write a note" type="text">
+        <!-- Button to add transaction -->
+        <button @onclick="AddTransaction">Add Transaction</button>
         @if (!string.IsNullOrEmpty(Message))
         {
-            <div class="messages">@Message</div>
+            <!-- Display success or error message -->
+            <div class="message">@Message</div>
         }
     </div>
 </div>
 
- <div class="transactions-container">
-    @if (transactionFilter != null && transactionFilter.Any())
-        {
-            <table class="transaction-table">
-                <thead>
-                    <tr>
-                        <th>
-                            Type
-                            <select id="tagFilter" @onchange="FilterByType">
-                                <option value="">All</option>
-                                @foreach (var tag in current_user.Trans.Select(t => t.trans_type).Distinct())
-                                {
-                                    <option value="@tag">@tag</option>
-                                }
-                            </select>
-                        </th>
-                        <th>Amount</th>
-                        <th>Date </th>
-                        <th>
-                            Tag
-                            <select id="tagFilter" @onchange="FilterByTag">
-                                <option value="">All</option>
-                                @foreach (var tag in current_user.Trans.Select(t => t.trans_tag).Distinct())
-                                {
-                                    <option value="@tag">@tag</option>
-                                }
-                            </select>
-                        </th>
-                        <th>Note</th>
-                    </tr>
-                </thead>
-                <tbody>
-                @foreach (var transaction in transactionFilter)
-                    {
-                        <tr>
-                            <td>@transaction.trans_type</td>
-                            <td class="amount">@transaction.trans_amount</td>
-                            <td>@transaction.trans_date</td>
-                            <td>@transaction.trans_tag</td>
-                            <td>@transaction.trans_note</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
-        else
-        {
-            <p>No transactions available.</p>
-        }
-    </div>
-
 @code {
-    
-    private string amount = "";
-    private string type = "";
-    private string Message = "";
-    private string tag = "";
-    private string note = "";
-    private DateTime? Date;
-    private string SDate = "";
+    private DateTime? Date; // Stores the transaction date
+    private string amount = ""; // Stores the transaction amount
+    private string type = ""; // Stores the transaction type (Income or Expense)
+    private string tag = ""; // Stores the transaction tag
+    private string note = ""; // Stores the transaction note
+    private string Message = ""; // Stores feedback messages for the user
+    private string SDate = ""; // Stores the formatted date as a string
+    private int totalInflow = 0;
+    private List<Transaction> filteredTransactions = new();
+    private List<Transaction> Transaction = new(); // List to manage transactions
+    private User? currentUser; // Stores the current logged-in user
 
-    private List<Transaction> transactionFilter = new();
-    private User? current_user;
-    private string filterType = "All";
-    private int totalIncome = 0;
-    private bool isSortAscending = true;
-    private string noteSearch = string.Empty;
-    private DateTime? startDate;
-    private DateTime? endDate;
+    // Method called when the component is initialized
+ 
 
     protected override void OnInitialized()
     {
-        current_user = UserService.GetLoggedInUser();
-        if (current_user == null)
+        currentUser = UserService.GetLoggedInUser();
+        if (currentUser != null)
+        {
+            filteredTransactions = UserService.UserTransactions();
+            totalInflow = currentUser.Trans
+                .Where(t => t.trans_type == "Income")
+                .Sum(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0);
+        }
+        else
         {
             Message = "Please log in to add transactions.";
         }
     }
-    private void AddTransactions()
+
+    // Method to handle adding a transaction
+    private void AddTransaction()
     {
         if (string.IsNullOrWhiteSpace(amount) ||
             string.IsNullOrWhiteSpace(type) ||
@@ -208,13 +160,14 @@
 
         SDate = Date.HasValue ? Date.Value.ToString("yyyy-MM-dd") : "";
 
-        if (type == "Expense" && transactionAmount > totalIncome)
+        if (type == "Expense" && transactionAmount > totalInflow)
         {
             Message = "Insufficient balance. Your total income is less than the expense.";
-            ClearFields();
+            Clear();
             return;
         }
 
+        // Create a new transaction object
         var newTransaction = new Transaction
             {
                 trans_date = SDate,
@@ -226,20 +179,13 @@
 
         try
         {
-            bool result = UserService.addTransaction(newTransaction);
+            // Attempt to add the transaction
+            bool results = UserService.addTransaction(newTransaction);
 
-            if (result)
+            if (results)
             {
-                current_user = UserService.GetLoggedInUser();
-                transactionFilter = current_user.Trans;
                 Message = "Transaction added successfully!";
-                if (type == "Income")
-                {
-                    totalIncome += transactionAmount;
-                }
-                StateHasChanged();
-
-                ClearFields();
+                Clear(); // Clear the form fields on success
             }
             else
             {
@@ -253,85 +199,12 @@
         }
     }
 
-    private void FilterByType(ChangeEventArgs e)
+    // Method to clear the form fields
+    private void Clear()
     {
-        var selectedType = e.Value?.ToString();
-        if (!string.IsNullOrEmpty(selectedType))
-        {
-            transactionFilter = current_user.Trans
-                .Where(t => t.trans_type == selectedType)
-                .ToList();
-        }
-        else
-        {
-            transactionFilter = current_user.Trans;
-        }
-    }
-
-    private void FilterByTag(ChangeEventArgs e)
-    {
-        var selectedTag = e.Value?.ToString();
-        if (!string.IsNullOrEmpty(selectedTag))
-        {
-            transactionFilter = current_user.Trans
-                .Where(t => t.trans_tag == selectedTag)
-                .ToList();
-        }
-        else
-        {
-            transactionFilter = current_user.Trans;
-        }
-    }
-
-    private void ToggleSortByDate()
-    {
-        if (isSortAscending)
-        {
-            transactionFilter = transactionFilter
-                .OrderBy(t => DateTime.Parse(t.trans_date))
-                .ToList();
-        }
-        else
-        {
-            transactionFilter = transactionFilter
-                .OrderByDescending(t => DateTime.Parse(t.trans_date))
-                .ToList();
-        }
-
-        isSortAscending = !isSortAscending;
-    }
-
-    private void SearchByNote()
-    {
-        transactionFilter = current_user.Trans
-            .Where(t => string.IsNullOrEmpty(noteSearch) ||
-                        (t.trans_note?.IndexOf(noteSearch, StringComparison.OrdinalIgnoreCase) >= 0))
-            .ToList();
-    }
-
-    private void FilterByDateRange()
-    {
-        if (startDate.HasValue && endDate.HasValue)
-        {
-            transactionFilter = current_user.Trans
-               .Where(t => DateTime.TryParse(t.trans_date, out DateTime transactionDate)
-                         && transactionDate >= startDate.Value
-                         && transactionDate <= endDate.Value)
-                .ToList();
-        }
-        else
-        {
-            Message = "Please select both start and end dates.";
-        }
-    }
-
-    private void ClearFields()
-    {
-        Date = null;
         amount = "";
         type = "";
         tag = "";
         note = "";
     }
 }
-

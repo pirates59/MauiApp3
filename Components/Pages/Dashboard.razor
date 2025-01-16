@@ -4,14 +4,25 @@
 @inject UserService UserService
 @using MauiApp3.Models
 
-<style>
 
+<style>
+    /* Styling for the body of the page */
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f9f9f9;
+        color: #333;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Container for cards layout */
     .cards-contain {
         display: flex;
         margin-bottom: 20px;
         width: 100%;
     }
 
+    /* Styling for individual filter cards */
     .card-filter {
         background-color: rgba(50, 173, 230, 0.25);
         margin-right: 10px;
@@ -22,207 +33,239 @@
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
+    /* Styling for horizontal form layout */
+    .horizontal-form {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+        /* Styling for form labels */
+        .horizontal-form label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        /* Styling for input date fields */
+        .horizontal-form input[type="date"] {
+            padding: 5px;
+            font-size: 1rem;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+    /* Styling for buttons */
     .styled-button {
         background-color: #EC993D;
         color: white;
-        border: none;
-        padding: 8px 12px;
-        border-radius: 4px;
-        cursor: pointer;
+        margin-left: auto;
+        padding: 10px 20px;
+        border-radius: 5px;
         font-size: 1rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s;
     }
 
+        /* Hover effect for button */
         .styled-button:hover {
             background-color: #D58233;
         }
 
-    .content {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-bottom: 5px;
-    }
-
-        .content label {
-            margin-right: 5px; /* Adds a small spacing between label and input */
-        }
-
+    /* Container to hold the whole page content */
     .container {
         width: 90%;
-        margin: 20px auto;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
     }
 
+    /* Row layout for cards */
     .row {
         display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        margin-bottom: 10px;
-    }
-
-    .card {
-        width: 23%;
-        margin: 10px 0;
-        border-radius: 3px;
-        overflow: hidden;
-    }
-
-    .card-header {
-        padding: 10px;
-        font-weight: bold;
-        border: none;
-        color: inherit;
-    }
-
-    .card-body {
-        padding: 20px;
-        font-size: 20px;
-        font-weight: bold;
-    }
-
-    .card-title {
-        font-size: 16px;
-        font-weight: bold;
-    }
-
-    .total-card {
-        background-color: rgba(50, 173, 230, 0.25);
-        color: black;
-    }
-
-    .transactions-card {
-        background-color: #6c757d;
-        color: black;
-    }
-
-    .table-container {
-        display: flex;
+        flex-wrap: nowrap;
         justify-content: space-between;
         gap: 20px;
+    }
+
+    /* Card styling for individual items like Total Transactions, Amount, etc. */
+    .card {
+        flex: 1 1 calc(25% - 20px);
+        max-width: calc(25% - 20px);
+        background-color: rgba(50, 173, 230, 0.25);
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    /* Title for each card */
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin: 10px 0;
+    }
+
+    /* Add space between rows */
+    .row + .row {
+        margin-top: 20px;
+    }
+
+    /* Card layout for larger screens, 2 cards per row */
+    .card {
+        flex: 1 1 calc(50% - 30px);
+        max-width: calc(50% - 30px);
+    }
+
+    /* Adjust the form layout to row direction and spacing */
+    .horizontal-form {
+        flex-direction: row;
+        gap: 20px;
+    }
+
+    /* Wrapper for table layout */
+    .table-wrapper {
+        flex: 1 1 100%;
+    }
+
+    /* Styling for the table container */
+    .table-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
         margin: 20px 0;
     }
 
+    /* Table wrapper for individual tables */
     .table-wrapper {
-        width: 100%;
+        flex: 1;
+        min-width: 300px;
         background-color: rgba(50, 173, 230, 0.25);
         padding: 20px;
-        border-radius: 5px;
-        box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
     }
 
+        /* Heading for tables */
+        .table-wrapper h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-weight: bold;
+        }
+
+    /* Styling for dropdown (select) filter */
+    .dropdown {
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+    }
+
+    /* Styling for tables */
     .table-style {
         width: 100%;
         border-collapse: collapse;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-top: 15px;
     }
 
+        /* Table header and cell styling */
+        .table-style th, .table-style td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        /* Table header styling */
         .table-style thead tr {
             color: black;
             text-align: left;
         }
 
-        .table-style th,
-        .table-style td {
-            padding: 10px;
-            border: 1px solid #ddd;
-        }
-
+        /* Hover effect for table rows */
         .table-style tbody tr:hover {
             background-color: #f1f1f1;
         }
-
-    .dropdown {
-        margin-bottom: 10px;
-        padding: 5px;
-        font-size: 1rem;
-    }
-
-    h3 {
-        font-size: 1.8rem;
-        margin-bottom: 15px;
-        color: black;
-    }
 </style>
 
-@if (currentUser != null)
+<!-- Conditional rendering for user greeting -->
+
+@if (currentUser != null) 
 {
-    <p>Welcome, @currentUser.user_name!</p>
+    <p>Welcome, @currentUser.user_name!</p> <!-- Displaying the current user's name -->
 }
 <div class="cards-contain">
- <div class="card-filter">
-    <div class="content">
-    <label for="start_date">Start Date:</label>
-    <input type="date" id="start_date" @bind="start_date" />
+    <div class="card-filter">
+        <div class="horizontal-form">
+            <label for="start_date">Start Date:</label>
+            <input type="date" id="start_date" @bind="start_date" />
 
-    <label for="end_date">End Date:</label>
-    <input type="date" id="end_date" @bind="end_date" />
+            <label for="end_date">End Date:</label>
+            <input type="date" id="end_date" @bind="end_date" />
 
-    <button class="styled-button" @onclick="DateFilter">Filter</button>
+            <button class="styled-button" @onclick="DateFilter">Filter</button>
+        </div>
+    </div>
 </div>
-</div>
-</div>
+
 
 <div class="container">
     <!-- Cards Section -->
     <div class="row">
         <!-- Total Transactions Card -->
-        <div class="card total-card">
-            <div class="card-body">
+        <div class="card">
                 Total Transactions
                 <h5 class="card-title">@totalTrans</h5>
             </div>
-        </div>
+        
 
         <!-- Total Amount Card -->
-        <div class="card total-card">
-            <div class="card-body">
+        <div class="card">
                 Total Amount
                 <h5 class="card-title">$@totalAmount</h5>
-            </div>
+            
         </div>
 
         <!-- Income Card -->
-        <div class="card total-card">
-            <div class="card-body">
+        <div class="card">
                 Cash Inflow
                 <h5 class="card-title">$@totalInflow</h5>
-            </div>
+            
         </div>
 
-        <!-- Expense Card -->
-        <div class="card total-card">
-            <div class="card-body">
+        <div class="card">
                 Cash Outflow
                 <h5 class="card-title">$@totalOutflow</h5>
-            </div>
+   
         </div>
     </div>
 
     <!-- More Cards -->
     <div class="row">
-        <div class="card total-card">
-            <div class="card-body">
+        <div class="card">
                 Debts
                 <h5 class="card-title">$@totalDebt</h5>
-            </div>
+            
         </div>
-        <div class="card total-card">
-            <div class="card-body">
+        <div class="card">
+            
                 Remaining Debts
                 <h5 class="card-title">$@pending_Debt</h5>
-            </div>
+           
         </div>
-        <div class="card total-card">
-            <div class="card-body">
+        <div class="card">
                 Cleared Debt
                 <h5 class="card-title">$@clearedDebts</h5>
-            </div>
+            
         </div>
     </div>
 
     <!-- Tables Section -->
     <div class="table-container">
         <!-- Transactions Table -->
-        <div class="table-wrapper transactions-card">
+        <div class="table-wrapper">
             <h3>Transactions</h3>
             <label for="typeFilter">Filter By Type:</label>
             <select id="typeFilter" @onchange="FilterType" class="dropdown">
@@ -253,11 +296,11 @@
             </table>
         </div>
 
-
-        <!-- Pending Debts Table -->
-        <div class="table-wrapper">
+            <!-- Transactions Table -->
+            <div class="table-wrapper">
             <h3>Pending Debts</h3>
-            <select @onchange="updateFilter" class="filter-dropdown">
+            <label for="typeFilter">Filter:</label>
+            <select @onchange="updateFilter" class="dropdown">
                 <option value="All">All</option>
                 <option value="Highest">Highest</option>
                 <option value="Lowest">Lowest</option>
@@ -286,6 +329,7 @@
 </div>
 
 @code {
+    // Declare variables for current user and financial data
     private User? currentUser;
     private int totalTrans = 0;
     private int totalAmount = 0;
@@ -302,11 +346,14 @@
     private List<Debt> clearedDebtsList = new();
     private string currentFilter = "All";
 
+    // On component initialization, fetch user data
+
     protected override void OnInitialized()
     {
         UserData();
     }
 
+    // Method to fetch current user's data
     private void UserData()
     {
         currentUser = UserService.GetLoggedInUser();
@@ -320,6 +367,7 @@
         }
     }
 
+    // Method to update financial data (e.g., totals)
     private void UpdateValues()
     {
         totalTrans = filteredTrans.Count;
@@ -343,7 +391,10 @@
 
         totalAmount = totalInflow - totalOutflow + totalDebt;
         StateHasChanged();
+
     }
+    // Method to filter transactions by amount (highest, lowest, or default)
+
     private void updateFilter(ChangeEventArgs e)
     {
         currentFilter = e.Value?.ToString() ?? "All";
@@ -370,6 +421,7 @@
         }
     }
 
+    // Method to add a new debt transaction
     private void AddDebt(int debtId, string receivedDate, string dueDate, int amount, string tag, string note, string source)
     {
         bool success = UserService.AddDebtTransaction(debtId, receivedDate, dueDate, amount.ToString(), tag, note, source);
@@ -386,6 +438,7 @@
         }
     }
 
+    // Method to clear a specific debt using income transactions
     private void ClearDebt(Debt debt)
     {
         if (!int.TryParse(debt.debt_amount, out var debtAmount))
@@ -446,6 +499,7 @@
         }
     }
 
+    // Method to filter transactions by type (income, expense, or all)
     private void FilterType(ChangeEventArgs e)
     {
         var selectedType = e.Value?.ToString();
@@ -465,7 +519,7 @@
         UpdateValues();
     }
 
-
+    // Method to filter transactions and debts by date range
     private void DateFilter()
     {
         if (start_date.HasValue && end_date.HasValue)

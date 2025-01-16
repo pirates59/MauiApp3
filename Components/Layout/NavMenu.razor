@@ -1,42 +1,57 @@
 ﻿@using MauiApp3.Services
-@inject UserService userService
-@inject NavigationManager NavigationManager
+@inject UserService userService 
+@inject NavigationManager NavigationManager 
 
+<!-- Top navigation bar -->
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
+        <!-- Logo of the application -->
         <img src="image/logo.png" alt="Moneymate Logo" style="height: 50px;">
     </div>
 </div>
 
+<!-- Checkbox for toggling navigation menu -->
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
+<!-- Scrollable navigation menu -->
 <div class="nav-scrollable nav" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="d-flex flex-column h-100">
+        <!-- Dashboard navigation link -->
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="dashboard" Match="NavLinkMatch.All">
                 <img src="image/dash.png" alt="Moneymate Logo" style="height: 18px;"> Dashboard
             </NavLink>
         </div>
+
+        <!-- Add Transactions navigation link -->
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="transaction">
                 <img src="image/trans.png" alt="Moneymate Logo" style="height: 18px;"> Add Transactions
             </NavLink>
         </div>
+
+        <!-- Cash Inflow navigation link -->
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="inflow">
                 <img src="image/inflow.png" alt="Moneymate Logo" style="height: 20px;"> Cash Inflow
             </NavLink>
         </div>
+
+        <!-- Cash Outflow navigation link -->
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="outflow">
                 <img src="image/outflow.png" alt="Moneymate Logo" style="height: 20px;"> Cash Outflow
             </NavLink>
         </div>
+
+        <!-- Debt navigation link -->
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="debt">
                 <img src="image/debt.png" alt="Moneymate Logo" style="height: 20px;"> Debt
             </NavLink>
         </div>
+
+        <!-- Logout navigation link -->
         <div class="nav-item px-3 mt-auto">
             <NavLink class="nav-link" href="logout">
                 <a href="/">
@@ -46,7 +61,3 @@
         </div>
     </nav>
 </div>
-
-
-
-

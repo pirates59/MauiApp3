@@ -5,6 +5,7 @@
 @inject UserService UserService
 
 <style>
+    /* Styling for the container and boxes */
     .container {
         max-width: 1200px;
         margin: auto;
@@ -12,7 +13,6 @@
         flex-direction: row;
         gap: 20px;
         padding: 20px;
-        
     }
 
     .left-box {
@@ -24,6 +24,13 @@
         border-radius: 8px;
         padding: 20px;
         position: relative;
+    }
+
+    .dropdown {
+        padding: 5px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
     }
 
     .right-box {
@@ -55,7 +62,7 @@
         border-radius: 4px;
         cursor: pointer;
         width: 140px;
-        align-self: flex-start; 
+        align-self: flex-start;
     }
 
     clear {
@@ -68,8 +75,6 @@
         width: 90px;
         align-self: flex-start;
     }
-
-       
 
     table {
         width: 100%;
@@ -92,6 +97,7 @@
     <div class="left-box">
         <h3>Debt</h3>
 
+        <!-- Input fields for debt information -->
         <label for="Date">Received Date</label>
         <input @bind="Date" type="date">
 
@@ -110,21 +116,27 @@
         <label for="debt_note">Debt Note</label>
         <input @bind="debt_note" type="text" placeholder="Enter a note">
 
+        <!-- Button to add debt -->
         <button @onclick="Add_debt">Add Debt</button>
 
+        <!-- Display message if applicable -->
         @if (!string.IsNullOrEmpty(Message))
         {
             <div class="message">@Message</div>
         }
     </div>
 
-
     <div class="right-box">
-        <select @onchange="UpdateFilter" class="filter-dropdown">
+        <!-- Filter dropdown for debt list -->
+          <label for="typeFilter">Filter:</label>
+            
+        <select @onchange="UpdateFilter" class="dropdown">
             <option value="All">All</option>
             <option value="Highest">Highest</option>
             <option value="Lowest">Lowest</option>
         </select>
+
+        <!-- Table to display the debt information -->
         <table>
             <thead>
                 <tr>
@@ -140,6 +152,7 @@
                 </tr>
             </thead>
             <tbody>
+                <!-- Loop through the filtered debts and display each one -->
                 @foreach (var debt in filteredDebts)
                 {
                     <tr>
@@ -152,26 +165,21 @@
                         <td>@debt.debt_note</td>
                         <td>@debt.debt_status</td>
                         <td>
+                            <!-- Show 'Clear' button only if the debt status is 'Pending' -->
                             @if (debt.debt_status == "Pending")
                             {
-
                                 <button class="clear" @onclick="() => ClearedDebt(debt)">Clear</button>
-                               
                             }
                         </td>
                     </tr>
                 }
             </tbody>
         </table>
-
     </div>
 </div>
 
-
-
-
-
 @code {
+    // Declare necessary properties and lists for debt and transaction data
     private DateTime? Date;
     private DateTime? due_date;
     private string source = string.Empty;
@@ -190,18 +198,15 @@
     private int total_debts = 0;
     private int nettotal = 0;
 
-
-
-
-
+    // Method to initialize and reload data on page load
     protected override void OnInitialized()
     {
         ReloadDebts();
         ApplyFilter();
         GrandTotal();
-
     }
 
+    // Method to load debts and transactions for the logged-in user
     private void ReloadDebts()
     {
         var users = UserService.UserAccounts();
@@ -218,9 +223,9 @@
         }
     }
 
+    // Method to calculate grand total of income, expenses, and pending debts
     private void GrandTotal()
     {
-       
         Income = transactions
             .Where(t => t.trans_type == "Income")
             .Sum(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0);
@@ -236,8 +241,7 @@
         nettotal = Income + total_debts - Expenses;
     }
 
-
-
+    // Method to add a new debt entry
     private void Add_debt()
     {
         if (Date == null || due_date == null || string.IsNullOrEmpty(source) ||
@@ -277,12 +281,14 @@
         }
     }
 
+    // Method to update filter selection and apply the filter
     private void UpdateFilter(ChangeEventArgs e)
     {
         currentFilter = e.Value?.ToString() ?? "All";
         ApplyFilter();
     }
 
+    // Method to apply the selected filter on the debts list
     private void ApplyFilter()
     {
         if (currentFilter == "Highest")
@@ -303,6 +309,7 @@
         }
     }
 
+    // Method to clear the debt when a payment is made
     private void ClearedDebt(Debt debt)
     {
         if (!int.TryParse(debt.debt_amount, out var originalAmount))
@@ -353,10 +360,10 @@
         debt.cleared_amount = payoff.ToString();
         debt.debt_status = "Cleared";
 
-        bool debtUpdateResult = UserService.DebtDetails(debt);
-        bool transactionsUpdateResult = UserService.UpdatedTransactions(transactions);
+        bool debtResult = UserService.DebtDetails(debt);
+        bool transactionsUpdate = UserService.UpdatedTransactions(transactions);
 
-        if (debtUpdateResult && transactionsUpdateResult)
+        if (debtResult && transactionsUpdate)
         {
             Message = $"Debt of {originalAmount} cleared successfully!";
             ReloadDebts();

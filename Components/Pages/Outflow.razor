@@ -4,19 +4,20 @@
 @inject UserService userService
 
 <style>
-
-  
+    /* Styling for container of cards */
     .cards-contain {
         display: flex;
         margin-bottom: 20px;
-        width:100%;
+        width: 100%;
     }
 
+    /* Center alignment for headers */
     h3 {
         text-align: center;
         color: #333;
     }
 
+    /* Container for card content */
     .content {
         display: flex;
         flex-direction: column;
@@ -24,6 +25,7 @@
         margin-bottom: 5px;
     }
 
+    /* Styling for individual cards */
     .card {
         background-color: rgba(50, 173, 230, 0.25);
         margin-right: 10px;
@@ -34,18 +36,67 @@
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
-   
-        .content img {
-            margin-bottom: 5px;
+    /* Styling for images inside card */
+    .content img {
+        margin-bottom: 5px;
+    }
+
+    /* Styling for the filter section */
+    .filter {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+        .filter label {
+            font-weight: bold;
+            margin-right: 10px;
+            color: #333;
         }
 
-
-        .card p {
-            margin: 5px 0;
-            color: black;
-            text-align: center;
+        .filter input[type="date"], .filter select {
+            padding: 8px;
+            font-size: 1rem;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            margin-right: 15px;
+            transition: border-color 0.3s ease;
         }
 
+            .filter input[type="date"]:focus, .filter select:focus {
+                border-color: #50ade6;
+                outline: none;
+            }
+
+    /* Button styling */
+    .styled-button {
+        background-color: #EC993D;
+        color: white;
+        border: none;
+        padding: 8px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+        .styled-button:hover {
+            background-color: #1c80c4;
+        }
+
+        .styled-button:active {
+            background-color: #1b6fa1;
+        }
+
+    /* Styling for paragraph inside card */
+    .card p {
+        margin: 5px 0;
+        color: black;
+        text-align: center;
+    }
+
+    /* Value styling inside card */
     .value {
         font-size: 1.2em;
         font-weight: bold;
@@ -53,6 +104,7 @@
         margin-top: 5px;
     }
 
+    /* Container for form fields */
     .container {
         background-color: rgba(50, 173, 230, 0.25);
         padding: 20px;
@@ -60,26 +112,22 @@
         box-shadow: 0 8px 10px rgba(0, 0, 0, 0.1);
         width: 100%;
         margin: auto;
-        margin-top: 50px;
+        margin-top: 20px;
         height: 100%;
     }
 
-    .filter {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 20px;
-        align-items: center;
-    }
-
+    /* Tag styling */
     .tag {
         margin-right: 10px;
     }
 
+    /* Search container for search input and button */
     .search-container {
         display: flex;
         align-items: center;
     }
 
+    /* Search input field styling */
     .search-input {
         flex: 1;
         border: none;
@@ -89,6 +137,7 @@
         font-size: 16px;
     }
 
+    /* Search button styling */
     .search-button {
         background: transparent;
         border: none;
@@ -103,18 +152,15 @@
             width: 18px;
         }
 
-
-    .styled-button {
-        background-color: rgba(50, 173, 230, 0.25);
-        color: black;
-        border: none;
-        padding: 4px;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
+    /* Styling for dropdowns */
+    .dropdown {
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
     }
 
-
+    /* Styling for table */
     .table-style {
         width: 100%;
         border-collapse: collapse;
@@ -131,11 +177,11 @@
             border: 1px solid #ddd;
         }
 
-        
         .table-style tbody tr:hover {
             background-color: #f1f1f1;
         }
 
+    /* Empty state message */
     .data {
         text-align: center;
         color: #888;
@@ -143,8 +189,7 @@
     }
 </style>
 
-
-
+<!-- Card showing total outflows -->
 <div class="cards-contain">
     <div class="card">
         <div class="content">
@@ -153,115 +198,125 @@
             <p class="value">@Expense</p>
         </div>
     </div>
-
-
-</div>
-<div class="filter">
-    <label for="startDate">Start Date:</label>
-    <input type="date" id="startDate" @bind="startDate" />
-
-    <label for="endDate">End Date:</label>
-    <input type="date" id="endDate" @bind="endDate" />
-
-    <button class="styled-button" @onclick="FilterByDateRange">Filter by Date Range</button>
-
-    <select @onchange="UpdateFilter" class="filter-dropdown">
-        <option value="All">All</option>
-        <option value="Highest">Highest</option>
-        <option value="Lowest">Lowest</option>
-    </select>
 </div>
 
-
+<!-- Filter form for date range and type -->
 <div class="container">
-<div class="filter">
-    <div class="tag">
-        <label for="Filter">Filter by Tag:</label>
-        <select id="Filter" @onchange="FilterTag">
-            <option value="">All</option>
-            @foreach (var tag in expenseTrans.Select(t => t.trans_tag).Distinct())
-            {
-                <option value="@tag">@tag</option>
-            }
-        </select>
+    <div class="filter">
+        <div class="tag">
+            <label for="start_date">Start Date:</label>
+            <input type="date" id="start_date" @bind="start_date" />
+
+            <label for="end_date">End Date:</label>
+            <input type="date" id="end_date" @bind="end_date" />
+
+            <!-- Button to trigger date filter -->
+            <button class="styled-button" @onclick="FilterByDate">Filter Date</button>
+        </div>
+        <div class="search-container">
+            <label for="typeFilter">Filter:</label>
+            <select @onchange="updateFilter" class="dropdown">
+                <option value="All">All</option>
+                <option value="Highest">Highest</option>
+                <option value="Lowest">Lowest</option>
+            </select>
+        </div>
     </div>
+</div>
+
+<!-- Filter form for tags and notes search -->
+<div class="container">
+    <div class="filter">
+        <div class="tag">
+            <label for="Filter">Filter by Tag:</label>
+            <select id="Filter" @onchange="FilterTag" class="dropdown">
+                <option value="">All</option>
+                @foreach (var tag in expenseTrans.Select(t => t.trans_tag).Distinct())
+                {
+                    <option value="@tag">@tag</option>
+                }
+            </select>
+        </div>
         <div class="search-container">
             <input type="text" id="notes" placeholder="Search by note" @bind="notes" />
             <button class="search-button" @onclick="SearchNote">
                 <img src="image/search.png" alt="Search" />
             </button>
         </div>
-        </div>
+    </div>
 
-@if (filterTrans.Any())
-{
-    <table class="table-style">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Tag</th>
-                <th>Note</th>
-                <th>Type</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var transaction in filterTrans)
-            {
+    <!-- Table to display filtered transactions -->
+    @if (filterTrans.Any())
+    {
+        <table class="table-style">
+            <thead>
                 <tr>
-
-
-                    <td>@transaction.trans_date</td>
-                    <td>@transaction.trans_amount</td>
-                    <td>@transaction.trans_tag</td>
-                    <td>@transaction.trans_note</td>
-                    <td>@transaction.trans_type</td>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Tag</th>
+                    <th>Note</th>
+                    <th>Type</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-
-  
-}
-else
-{
-    <p class="data">No expense transactions found.</p>
-}
+            </thead>
+            <tbody>
+                @foreach (var transaction in filterTrans)
+                {
+                    <tr>
+                        <td>@transaction.trans_date</td>
+                        <td>@transaction.trans_amount</td>
+                        <td>@transaction.trans_tag</td>
+                        <td>@transaction.trans_note</td>
+                        <td>@transaction.trans_type</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p class="data">No expense transactions found.</p>
+    }
 </div>
 
 @code {
+    // Variables for transactions and filters
     private List<Transaction> expenseTrans = new List<Transaction>();
     private List<Transaction> filterTrans = new List<Transaction>();
     private int Expense = 0;
     private int avgExpense = 0;
-    private DateTime? startDate;
+    private DateTime? start_date;
     private bool isSortAscending = true;
     private string currentFilter = "All";
-    private DateTime? endDate;
+    private DateTime? end_date;
     private string notes = string.Empty;
 
+    // Initialize data when the page loads
     protected override void OnInitialized()
     {
-        LoadUserData();
+        UserData();
     }
 
-    private void LoadUserData()
+    // Method to load user data and expense transactions
+    private void UserData()
     {
         var loggedInUser = userService.GetLoggedInUser();
         if (loggedInUser != null)
         {
+            // Filter transactions to only expenses
             expenseTrans = loggedInUser.Trans
-                .Where(t => t.trans_type == "Income")
+                .Where(t => t.trans_type == "Expense")
                 .ToList();
 
             filterTrans = expenseTrans;
 
+            // Calculate the total expense amount
             Expense = expenseTrans
                 .Sum(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0);
         }
     }
 
-    private void UpdateFilter(ChangeEventArgs e)
+    // Method to update filter based on selection (Highest, Lowest, or All)
+    private void updateFilter(ChangeEventArgs e)
     {
         currentFilter = e.Value?.ToString() ?? "All";
 
@@ -285,14 +340,17 @@ else
         }
     }
 
-    private void FilterByDateRange()
+    // Method to filter transactions based on selected date range
+    private void FilterByDate()
     {
-        if (startDate.HasValue && endDate.HasValue)
+        if (start_date.HasValue && end_date.HasValue)
         {
+            // Filter transactions based on date range
             filterTrans = expenseTrans
-                .Where(t => DateTime.TryParse(t.trans_date, out var date) && date >= startDate && date <= endDate)
+                .Where(t => DateTime.TryParse(t.trans_date, out var date) && date >= start_date && date <= end_date)
                 .ToList();
 
+            // Recalculate total expense
             Expense = filterTrans
                 .Sum(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0);
         }
@@ -303,6 +361,8 @@ else
                 .Sum(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0);
         }
     }
+
+    // Toggle sorting transactions by date
     private void ToggleSortByDate()
     {
         if (isSortAscending)
@@ -316,6 +376,7 @@ else
         isSortAscending = !isSortAscending;
     }
 
+    // Method to filter transactions by tag
     private void FilterTag(ChangeEventArgs e)
     {
         var Tag = e.Value?.ToString();
@@ -331,6 +392,7 @@ else
         }
     }
 
+    // Method to filter transactions by note content
     private void SearchNote()
     {
         filterTrans = expenseTrans
@@ -338,5 +400,4 @@ else
                         (t.trans_note?.IndexOf(notes, StringComparison.OrdinalIgnoreCase) >= 0))
             .ToList();
     }
-
 }
