@@ -4,14 +4,24 @@
 @inject UserService userService
 
 <style>
+
+  
+    .cards-contain {
+        display: flex;
+        margin-bottom: 20px;
+        width:100%;
+    }
+
     h3 {
         text-align: center;
         color: #333;
     }
 
-    .cards-container {
+    .content {
         display: flex;
-        margin-bottom: 20px;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 5px;
     }
 
     .card {
@@ -24,39 +34,75 @@
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
+   
+        .content img {
+            margin-bottom: 5px;
+        }
+
+
         .card p {
             margin: 5px 0;
             color: black;
             text-align: center;
         }
 
-    .card-value {
+    .value {
         font-size: 1.2em;
         font-weight: bold;
         color: black;
         margin-top: 5px;
     }
 
-    .filter-container {
+    .container {
+        background-color: rgba(50, 173, 230, 0.25);
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 8px 10px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        margin: auto;
+        margin-top: 50px;
+        height: 100%;
+    }
+
+    .filter {
         display: flex;
         justify-content: space-between;
         margin-bottom: 20px;
         align-items: center;
     }
 
-    .tag-filter {
+    .tag {
         margin-right: 10px;
     }
 
     .search-container {
         display: flex;
         align-items: center;
-        justify-content: flex-end;
     }
 
-        .search-container label {
-            margin-right: 10px;
+    .search-input {
+        flex: 1;
+        border: none;
+        outline: none;
+        background: transparent;
+        padding: 5px;
+        font-size: 16px;
+    }
+
+    .search-button {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .search-button img {
+            height: 18px;
+            width: 18px;
         }
+
 
     .styled-button {
         background-color: rgba(50, 173, 230, 0.25);
@@ -69,33 +115,29 @@
     }
 
 
-    .styled-table {
+    .table-style {
         width: 100%;
         border-collapse: collapse;
         margin-top: 20px;
     }
 
-        .styled-table thead tr {
+        .table-style thead tr {
             color: black;
             text-align: left;
         }
 
-        .styled-table th, .styled-table td {
+        .table-style th, .table-style td {
             padding: 10px;
             border: 1px solid #ddd;
         }
 
-        .styled-table tbody tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        .styled-table tbody tr:hover {
+        
+        .table-style tbody tr:hover {
             background-color: #f1f1f1;
         }
 
-    .no-data {
+    .data {
         text-align: center;
-        font-style: italic;
         color: #888;
         margin-top: 20px;
     }
@@ -103,35 +145,57 @@
 
 
 
-<div class="cards-container">
+<div class="cards-contain">
     <div class="card">
-        <p><strong>Total Outflows </strong></p>
-        <p class="card-value">@totalExpense</p>
+        <div class="content">
+            <img src="image/Expenses.png" alt="Expense Logo" style="height: 22px; width:22px">
+            <p><strong>Total Outflows</strong></p>
+            <p class="value">@Expense</p>
+        </div>
     </div>
 
+
+</div>
+<div class="filter">
+    <label for="startDate">Start Date:</label>
+    <input type="date" id="startDate" @bind="startDate" />
+
+    <label for="endDate">End Date:</label>
+    <input type="date" id="endDate" @bind="endDate" />
+
+    <button class="styled-button" @onclick="FilterByDateRange">Filter by Date Range</button>
+
+    <select @onchange="UpdateFilter" class="filter-dropdown">
+        <option value="All">All</option>
+        <option value="Highest">Highest</option>
+        <option value="Lowest">Lowest</option>
+    </select>
 </div>
 
-<div class="filter-container">
-    <div class="tag-filter">
-        <label for="tagFilter">Filter by Tag:</label>
-        <select id="tagFilter" @onchange="FilterByTag">
+
+<div class="container">
+<div class="filter">
+    <div class="tag">
+        <label for="Filter">Filter by Tag:</label>
+        <select id="Filter" @onchange="FilterTag">
             <option value="">All</option>
-            @foreach (var tag in expenseTransactions.Select(t => t.trans_tag).Distinct())
+            @foreach (var tag in expenseTrans.Select(t => t.trans_tag).Distinct())
             {
                 <option value="@tag">@tag</option>
             }
         </select>
     </div>
-    <div class="search-container">
-        <label for="noteSearch">Search by Note:</label>
-        <input type="text" id="noteSearch" @bind="noteSearch" />
-        <button class="styled-button" @onclick="SearchByNote">Search</button>
-    </div>
-</div>
+        <div class="search-container">
+            <input type="text" id="notes" placeholder="Search by note" @bind="notes" />
+            <button class="search-button" @onclick="SearchNote">
+                <img src="image/search.png" alt="Search" />
+            </button>
+        </div>
+        </div>
 
-@if (filteredTransactions.Any())
+@if (filterTrans.Any())
 {
-    <table class="styled-table">
+    <table class="table-style">
         <thead>
             <tr>
                 <th>Date</th>
@@ -142,7 +206,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var transaction in filteredTransactions)
+            @foreach (var transaction in filterTrans)
             {
                 <tr>
 
@@ -156,69 +220,122 @@
             }
         </tbody>
     </table>
+
+  
 }
 else
 {
-    <p class="no-data">No expense transactions found.</p>
+    <p class="data">No expense transactions found.</p>
 }
-
+</div>
 
 @code {
-    private List<Transaction> expenseTransactions = new List<Transaction>();
-    private List<Transaction> filteredTransactions = new List<Transaction>();
-    private int totalExpense = 0;
-    private int averageExpense = 0;
-    private string noteSearch = string.Empty;
-
+    private List<Transaction> expenseTrans = new List<Transaction>();
+    private List<Transaction> filterTrans = new List<Transaction>();
+    private int Expense = 0;
+    private int avgExpense = 0;
+    private DateTime? startDate;
+    private bool isSortAscending = true;
+    private string currentFilter = "All";
+    private DateTime? endDate;
+    private string notes = string.Empty;
 
     protected override void OnInitialized()
     {
-        var Users = userService.LoadUserAccounts();
-        var loggedInUser = userService.GetLoggedInUser();
+        LoadUserData();
+    }
 
+    private void LoadUserData()
+    {
+        var loggedInUser = userService.GetLoggedInUser();
         if (loggedInUser != null)
         {
-            // Find the current user in the loaded users list
-            var currentUser = Users.FirstOrDefault(u => u.userId == loggedInUser.userId);
+            expenseTrans = loggedInUser.Trans
+                .Where(t => t.trans_type == "Income")
+                .ToList();
 
-            if (currentUser != null)
-            {
-                expenseTransactions = currentUser.Trans
-                   .Where(t => t.trans_type == "Expense")
-                   .ToList();
+            filterTrans = expenseTrans;
 
-                filteredTransactions = expenseTransactions;
-
-                totalExpense = expenseTransactions
-                 .Sum(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0);
-
-                averageExpense = expenseTransactions.Any()
-                    ? totalExpense / expenseTransactions.Count
-                    : 0;
-            }
+            Expense = expenseTrans
+                .Sum(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0);
         }
     }
 
-    private void FilterByTag(ChangeEventArgs e)
+    private void UpdateFilter(ChangeEventArgs e)
     {
-        var selectedTag = e.Value?.ToString();
-        if (!string.IsNullOrEmpty(selectedTag))
+        currentFilter = e.Value?.ToString() ?? "All";
+
+        if (currentFilter == "Highest")
         {
-            filteredTransactions = expenseTransactions
-                .Where(t => t.trans_tag == selectedTag)
+            filterTrans = expenseTrans
+                .OrderByDescending(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0)
+                .Take(5)
+                .ToList();
+        }
+        else if (currentFilter == "Lowest")
+        {
+            filterTrans = expenseTrans
+                .OrderBy(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0)
+                .Take(5)
                 .ToList();
         }
         else
         {
-            filteredTransactions = expenseTransactions;
+            filterTrans = expenseTrans;
         }
     }
 
-    private void SearchByNote()
+    private void FilterByDateRange()
     {
-        filteredTransactions = expenseTransactions
-            .Where(t => string.IsNullOrEmpty(noteSearch) ||
-                        (t.trans_note?.IndexOf(noteSearch, StringComparison.OrdinalIgnoreCase) >= 0))
+        if (startDate.HasValue && endDate.HasValue)
+        {
+            filterTrans = expenseTrans
+                .Where(t => DateTime.TryParse(t.trans_date, out var date) && date >= startDate && date <= endDate)
+                .ToList();
+
+            Expense = filterTrans
+                .Sum(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0);
+        }
+        else
+        {
+            filterTrans = expenseTrans;
+            Expense = expenseTrans
+                .Sum(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0);
+        }
+    }
+    private void ToggleSortByDate()
+    {
+        if (isSortAscending)
+        {
+            filterTrans = filterTrans.OrderBy(t => DateTime.Parse(t.trans_date)).ToList();
+        }
+        else
+        {
+            filterTrans = filterTrans.OrderByDescending(t => DateTime.Parse(t.trans_date)).ToList();
+        }
+        isSortAscending = !isSortAscending;
+    }
+
+    private void FilterTag(ChangeEventArgs e)
+    {
+        var Tag = e.Value?.ToString();
+        if (!string.IsNullOrEmpty(Tag))
+        {
+            filterTrans = expenseTrans
+                .Where(t => t.trans_tag == Tag)
+                .ToList();
+        }
+        else
+        {
+            filterTrans = expenseTrans;
+        }
+    }
+
+    private void SearchNote()
+    {
+        filterTrans = expenseTrans
+            .Where(t => string.IsNullOrEmpty(notes) ||
+                        (t.trans_note?.IndexOf(notes, StringComparison.OrdinalIgnoreCase) >= 0))
             .ToList();
     }
 

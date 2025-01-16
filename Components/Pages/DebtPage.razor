@@ -12,15 +12,18 @@
         flex-direction: row;
         gap: 20px;
         padding: 20px;
+        
     }
 
     .left-box {
         flex: 1;
         display: flex;
+        background-color: rgba(50, 173, 230, 0.25);
         flex-direction: column;
         border: 1px solid #ccc;
         border-radius: 8px;
         padding: 20px;
+        position: relative;
     }
 
     .right-box {
@@ -28,6 +31,7 @@
         border: 1px solid #ccc;
         border-radius: 8px;
         padding: 20px;
+        background-color: rgba(50, 173, 230, 0.25);
     }
 
     label {
@@ -45,18 +49,27 @@
 
     button {
         padding: 10px;
-        background-color: #32ADE6;
+        background-color: #EC993D;
         color: white;
         border: none;
         border-radius: 4px;
         cursor: pointer;
         width: 140px;
-        align-self: flex-start; /* Align button to the left */
+        align-self: flex-start; 
     }
 
-        button:hover {
-            background-color: #28A0D6;
-        }
+    clear {
+        padding: 10px;
+        background-color: #EC993D;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 90px;
+        align-self: flex-start;
+    }
+
+       
 
     table {
         width: 100%;
@@ -71,35 +84,33 @@
         }
 
         table th {
-            background-color: #32ADE6;
-            color: white;
+            color: black;
         }
 </style>
 
 <div class="container">
-    <!-- Left Box for Form -->
     <div class="left-box">
-        <h3>Debt Transactions</h3>
+        <h3>Debt</h3>
 
-        <label for="receivedDate">Received Date:</label>
-        <input @bind="receivedDate" type="date">
+        <label for="Date">Received Date</label>
+        <input @bind="Date" type="date">
 
-        <label for="dueDate">Due Date:</label>
-        <input @bind="dueDate" type="date">
+        <label for="due_date">Due Date</label>
+        <input @bind="due_date" type="date">
 
-        <label for="amount">Debt Amount:</label>
+        <label for="amount">Debt Amount</label>
         <input @bind="amount" type="number" placeholder="Enter amount">
 
-        <label for="sourceName">Source Name:</label>
-        <input @bind="sourceName" type="text" placeholder="Enter Source Name">
+        <label for="source">Source</label>
+        <input @bind="source" type="text" placeholder="Enter the source">
 
-        <label for="debtTag">Debt Tag:</label>
-        <input @bind="debtTag" type="text" placeholder="Provide tag">
+        <label for="tag">Debt Tag</label>
+        <input @bind="tag" type="text" placeholder="Enter a tag">
 
-        <label for="debtNote">Debt Note:</label>
-        <input @bind="debtNote" type="text" placeholder="Write a note">
+        <label for="debt_note">Debt Note</label>
+        <input @bind="debt_note" type="text" placeholder="Enter a note">
 
-        <button @onclick="AddDebt">Add Debt</button>
+        <button @onclick="Add_debt">Add Debt</button>
 
         @if (!string.IsNullOrEmpty(Message))
         {
@@ -107,15 +118,20 @@
         }
     </div>
 
-    <!-- Right Box for Table -->
+
     <div class="right-box">
+        <select @onchange="UpdateFilter" class="filter-dropdown">
+            <option value="All">All</option>
+            <option value="Highest">Highest</option>
+            <option value="Lowest">Lowest</option>
+        </select>
         <table>
             <thead>
                 <tr>
                     <th>Date</th>
                     <th>Due Date</th>
-                    <th>Original Amount</th>
-                    <th>Cleared Amount</th>
+                    <th>Amount</th>
+                    <th>Pay off</th>
                     <th>Source</th>
                     <th>Tag</th>
                     <th>Note</th>
@@ -124,10 +140,10 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var debt in Debts)
+                @foreach (var debt in filteredDebts)
                 {
                     <tr>
-                        <td>@debt.date</td>
+                        <td>@debt.Date</td>
                         <td>@debt.due_date</td>
                         <td>@debt.debt_amount</td>
                         <td>@debt.cleared_amount</td>
@@ -138,7 +154,9 @@
                         <td>
                             @if (debt.debt_status == "Pending")
                             {
-                                <button class="clear" @onclick="() => ClearDebt(debt)">Clear</button>
+
+                                <button class="clear" @onclick="() => ClearedDebt(debt)">Clear</button>
+                               
                             }
                         </td>
                     </tr>
@@ -154,24 +172,22 @@
 
 
 @code {
-    private DateTime? receivedDate;
-    private DateTime? dueDate;
-    private string sourceName = string.Empty;
-    private string debtTag = string.Empty;
-    private string debtNote = string.Empty;
+    private DateTime? Date;
+    private DateTime? due_date;
+    private string source = string.Empty;
+    private string tag = string.Empty;
+    private string debt_note = string.Empty;
     private int amount = 0;
+    private string currentFilter = "All";
     private string Message = string.Empty;
-
-
-
 
     private List<Debt> Debts = new();
     private List<Debt> filteredDebts = new();
 
     private List<Transaction> transactions = new();
-    private int totalIncome = 0;
-    private int totalExpenses = 0;
-    private int totalDebts = 0;
+    private int Income = 0;
+    private int Expenses = 0;
+    private int total_debts = 0;
     private int nettotal = 0;
 
 
@@ -180,14 +196,15 @@
 
     protected override void OnInitialized()
     {
-        LoadDebts();
-        CalculateTotals();
+        ReloadDebts();
+        ApplyFilter();
+        GrandTotal();
 
     }
 
-    private void LoadDebts()
+    private void ReloadDebts()
     {
-        var users = UserService.LoadUserAccounts();
+        var users = UserService.UserAccounts();
         var loggedInUser = UserService.GetLoggedInUser();
 
         if (loggedInUser != null)
@@ -201,30 +218,30 @@
         }
     }
 
-    private void CalculateTotals()
+    private void GrandTotal()
     {
-        // Safely calculate total income
-        totalIncome = transactions
+       
+        Income = transactions
             .Where(t => t.trans_type == "Income")
             .Sum(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0);
 
-        totalExpenses = transactions
+        Expenses = transactions
             .Where(t => t.trans_type == "Expense")
             .Sum(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0);
 
-        totalDebts = Debts
+        total_debts = Debts
             .Where(d => d.debt_status == "Pending")
             .Sum(d => int.TryParse(d.debt_amount, out var amount) ? amount : 0);
 
-        nettotal = totalIncome + totalDebts - totalExpenses;
+        nettotal = Income + total_debts - Expenses;
     }
 
 
 
-    private void AddDebt()
+    private void Add_debt()
     {
-        if (receivedDate == null || dueDate == null || string.IsNullOrEmpty(sourceName) ||
-            string.IsNullOrEmpty(debtTag) || string.IsNullOrEmpty(debtNote) || amount <= 0)
+        if (Date == null || due_date == null || string.IsNullOrEmpty(source) ||
+            string.IsNullOrEmpty(tag) || string.IsNullOrEmpty(debt_note) || amount <= 0)
         {
             Message = "Please fill all the fields correctly.";
             return;
@@ -232,14 +249,27 @@
 
         int debt_id = Debts.Any() ? Debts.Max(d => d.debt_id) + 1 : 1;
 
-        bool result = UserService.AddDebtTransaction(debt_id, receivedDate.Value.ToString("yyyy-MM-dd"),
-           dueDate.Value.ToString("yyyy-MM-dd"), amount.ToString(), debtTag, debtNote, sourceName);
+        bool proof = UserService.AddDebtTransaction(debt_id, Date.Value.ToString("yyyy-MM-dd"),
+           due_date.Value.ToString("yyyy-MM-dd"), amount.ToString(), tag, debt_note, source);
 
-        if (result)
+        if (proof)
         {
+            Debts.Add(new Debt
+                {
+                    debt_id = debt_id,
+                    Date = Date.Value.ToString("yyyy-MM-dd"),
+                    due_date = due_date.Value.ToString("yyyy-MM-dd"),
+                    debt_amount = amount.ToString(),
+                    source = source,
+                    debt_tag = tag,
+                    debt_note = debt_note,
+                    debt_status = "Pending"
+                });
+
+            ApplyFilter();
+            GrandTotal();
             Message = "Debt added successfully!";
-            LoadDebts(); // Refresh the data
-            StateHasChanged(); // Update UI
+            StateHasChanged();
         }
         else
         {
@@ -247,70 +277,98 @@
         }
     }
 
-
-
-    private void ClearDebt(Debt debt)
+    private void UpdateFilter(ChangeEventArgs e)
     {
-        if (!int.TryParse(debt.debt_amount, out var originalDebtAmount))
+        currentFilter = e.Value?.ToString() ?? "All";
+        ApplyFilter();
+    }
+
+    private void ApplyFilter()
+    {
+        if (currentFilter == "Highest")
+        {
+            filteredDebts = Debts
+                .OrderByDescending(d => int.TryParse(d.debt_amount, out var amount) ? amount : 0)
+                .ToList();
+        }
+        else if (currentFilter == "Lowest")
+        {
+            filteredDebts = Debts
+                .OrderBy(d => int.TryParse(d.debt_amount, out var amount) ? amount : 0)
+                .ToList();
+        }
+        else
+        {
+            filteredDebts = Debts;
+        }
+    }
+
+    private void ClearedDebt(Debt debt)
+    {
+        if (!int.TryParse(debt.debt_amount, out var originalAmount))
         {
             Message = "Invalid debt amount. Unable to process.";
             return;
         }
 
-        int remainingDebt = originalDebtAmount;
-        int clearedAmount = 0;
+        int remaining_debt = originalAmount;
+        int payoff = 0;
 
-        var incomeTransactions = transactions
+        var incomeTrans = transactions
             .Where(t => t.trans_type == "Income" && int.TryParse(t.trans_amount, out var amt) && amt > 0)
             .OrderBy(t => t.trans_date)
             .ToList();
 
-        foreach (var transaction in incomeTransactions)
+        foreach (var trans in incomeTrans)
         {
-            if (!int.TryParse(transaction.trans_amount, out var transactionAmount)) continue;
+            if (!int.TryParse(trans.trans_amount, out var transAmount)) continue;
 
-            if (remainingDebt <= transactionAmount)
+            if (remaining_debt <= transAmount)
             {
-                clearedAmount += remainingDebt;
-                transactionAmount -= remainingDebt;
-                transaction.trans_amount = transactionAmount.ToString();
-                remainingDebt = 0;
-                if (transactionAmount == 0)
+                payoff += remaining_debt;
+                transAmount -= remaining_debt;
+                trans.trans_amount = transAmount.ToString();
+                remaining_debt = 0;
+                if (transAmount == 0)
                 {
-                    transactions.Remove(transaction);
+                    transactions.Remove(trans);
                 }
                 break;
             }
             else
             {
-                clearedAmount += transactionAmount;
-                remainingDebt -= transactionAmount;
-                transaction.trans_amount = "0";
-                transactions.Remove(transaction);
+                payoff += transAmount;
+                remaining_debt -= transAmount;
+                trans.trans_amount = "0";
+                transactions.Remove(trans);
             }
         }
 
-        if (remainingDebt > 0)
+        if (remaining_debt > 0)
         {
             Message = "Insufficient funds across income transactions to clear the debt.";
             return;
         }
 
-        debt.cleared_amount = clearedAmount.ToString(); // Track cleared amount
-        debt.debt_status = "Cleared"; // Update status
+        debt.cleared_amount = payoff.ToString();
+        debt.debt_status = "Cleared";
 
-        if (UserService.UpdateDebtDetails(debt))
+        bool debtUpdateResult = UserService.DebtDetails(debt);
+        bool transactionsUpdateResult = UserService.UpdatedTransactions(transactions);
+
+        if (debtUpdateResult && transactionsUpdateResult)
         {
-            Message = $"Debt of {originalDebtAmount} cleared successfully!";
-            LoadDebts(); // Refresh data
+            Message = $"Debt of {originalAmount} cleared successfully!";
+            ReloadDebts();
+            ApplyFilter();
         }
         else
         {
             Message = "Failed to clear debt. Please try again.";
-            debt.debt_status = "Pending"; // Rollback on failure
+            debt.debt_status = "Pending";
             debt.cleared_amount = "0";
         }
 
-        CalculateTotals();
+        GrandTotal();
     }
 }

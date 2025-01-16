@@ -23,6 +23,12 @@
         color: #333;
     }
 
+    .form {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
     .form input, .form select {
         display: block;
         width: 100%;
@@ -40,90 +46,178 @@
             box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
         }
 
-    .form button {
-        display: inline-block;
-        width: 20%;
-        padding: 10px;
-        background-color: #EC993D;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-size: 1rem;
-        cursor: pointer;
-        font-weight: bold;
+
+
+        .form button {
+            margin-left: auto; 
+            width: auto; 
+            padding: 10px 20px;
+            background-color: #EC993D;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            .form button:hover {
+            background-color: #EC993D;
+        }
+
+    .form button:hover {
+        background-color: #d27c32;
     }
 
-        .form button:hover {
-            background-color: #EC993D;
-        }
+    .form button:active {
+        background-color: #b8692a;
+    }
 
-        .form button:active {
-            background-color: #EC993D;
-        }
-
-    .message {
+    .messages {
         color: green;
         font-size: 0.9rem;
         margin-top: 10px;
     }
 </style>
+<div class="search-container">
+    <label for="noteSearch">Search by Note:</label>
+    <input type="text" id="noteSearch" @bind="noteSearch" />
+    <button class="styled-button" @onclick="SearchByNote">Search</button>
 
+    <label for="startDate">Start Date:</label>
+    <input type="date" id="startDate" @bind="startDate" />
+
+    <label for="endDate">End Date:</label>
+    <input type="date" id="endDate" @bind="endDate" />
+
+    <button class="styled-button" @onclick="FilterByDateRange">Filter by Date Range</button>
+</div>
 
 <div class="container">
     <h3>Transactions</h3>
     <div class="form">
-        <input @bind="Date" placeholder="Enter date" type="date">
-        <input @bind="amount" placeholder="Provide Amount" type="text">
+        <input @bind="Date" placeholder="Select the date" type="date">
+        <input @bind="amount" placeholder="Enter the amount" type="text">
         <select @bind="type">
-            <option value="">Choose Type</option>
+            <option value="">Choose type</option>
             <option value="Income">Income</option>
             <option value="Expense">Expense</option>
         </select>
-        <input @bind="tag" placeholder="Provide a tag" type="text">
-        <input @bind="note" placeholder="Write a note" type="text">
-        <button @onclick="AddTransaction">Add Transaction</button>
+        <input @bind="tag" placeholder="Enter a tag" type="text">
+        <input @bind="note" placeholder="Enter a note" type="text">
+        <button @onclick="AddTransactions">Add Transaction</button>
         @if (!string.IsNullOrEmpty(Message))
         {
-            <div class="message">@Message</div>
+            <div class="messages">@Message</div>
         }
     </div>
 </div>
 
+ <div class="transactions-container">
+    @if (transactionFilter != null && transactionFilter.Any())
+        {
+            <table class="transaction-table">
+                <thead>
+                    <tr>
+                        <th>
+                            Type
+                            <select id="tagFilter" @onchange="FilterByType">
+                                <option value="">All</option>
+                                @foreach (var tag in current_user.Trans.Select(t => t.trans_type).Distinct())
+                                {
+                                    <option value="@tag">@tag</option>
+                                }
+                            </select>
+                        </th>
+                        <th>Amount</th>
+                        <th>Date </th>
+                        <th>
+                            Tag
+                            <select id="tagFilter" @onchange="FilterByTag">
+                                <option value="">All</option>
+                                @foreach (var tag in current_user.Trans.Select(t => t.trans_tag).Distinct())
+                                {
+                                    <option value="@tag">@tag</option>
+                                }
+                            </select>
+                        </th>
+                        <th>Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var transaction in transactionFilter)
+                    {
+                        <tr>
+                            <td>@transaction.trans_type</td>
+                            <td class="amount">@transaction.trans_amount</td>
+                            <td>@transaction.trans_date</td>
+                            <td>@transaction.trans_tag</td>
+                            <td>@transaction.trans_note</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>No transactions available.</p>
+        }
+    </div>
+
 @code {
-    private DateTime? Date;
+    
     private string amount = "";
     private string type = "";
+    private string Message = "";
     private string tag = "";
     private string note = "";
-    private string Message = "";
-    private string StringDate = "";
+    private DateTime? Date;
+    private string SDate = "";
 
-    private List<Transaction> Transaction = new();
-    private User? currentUser;
+    private List<Transaction> transactionFilter = new();
+    private User? current_user;
+    private string filterType = "All";
+    private int totalIncome = 0;
+    private bool isSortAscending = true;
+    private string noteSearch = string.Empty;
+    private DateTime? startDate;
+    private DateTime? endDate;
 
     protected override void OnInitialized()
     {
-        currentUser = UserService.GetLoggedInUser();
-        if (currentUser == null)
+        current_user = UserService.GetLoggedInUser();
+        if (current_user == null)
         {
             Message = "Please log in to add transactions.";
         }
     }
-    private void AddTransaction()
+    private void AddTransactions()
     {
         if (string.IsNullOrWhiteSpace(amount) ||
-            string.IsNullOrWhiteSpace(type) || string.IsNullOrWhiteSpace(tag) ||
+            string.IsNullOrWhiteSpace(type) ||
+            string.IsNullOrWhiteSpace(tag) ||
             string.IsNullOrWhiteSpace(note))
         {
             Message = "All fields are required. Please fill them correctly.";
             return;
         }
 
-        StringDate = Date.Value.ToString("yyyy-MM-dd");
+        if (!int.TryParse(amount, out var transactionAmount))
+        {
+            Message = "Please enter a valid amount.";
+            return;
+        }
+
+        SDate = Date.HasValue ? Date.Value.ToString("yyyy-MM-dd") : "";
+
+        if (type == "Expense" && transactionAmount > totalIncome)
+        {
+            Message = "Insufficient balance. Your total income is less than the expense.";
+            ClearFields();
+            return;
+        }
 
         var newTransaction = new Transaction
             {
-                trans_date = StringDate,
+                trans_date = SDate,
                 trans_amount = amount,
                 trans_type = type,
                 trans_tag = tag,
@@ -136,7 +230,15 @@
 
             if (result)
             {
+                current_user = UserService.GetLoggedInUser();
+                transactionFilter = current_user.Trans;
                 Message = "Transaction added successfully!";
+                if (type == "Income")
+                {
+                    totalIncome += transactionAmount;
+                }
+                StateHasChanged();
+
                 ClearFields();
             }
             else
@@ -151,12 +253,85 @@
         }
     }
 
+    private void FilterByType(ChangeEventArgs e)
+    {
+        var selectedType = e.Value?.ToString();
+        if (!string.IsNullOrEmpty(selectedType))
+        {
+            transactionFilter = current_user.Trans
+                .Where(t => t.trans_type == selectedType)
+                .ToList();
+        }
+        else
+        {
+            transactionFilter = current_user.Trans;
+        }
+    }
+
+    private void FilterByTag(ChangeEventArgs e)
+    {
+        var selectedTag = e.Value?.ToString();
+        if (!string.IsNullOrEmpty(selectedTag))
+        {
+            transactionFilter = current_user.Trans
+                .Where(t => t.trans_tag == selectedTag)
+                .ToList();
+        }
+        else
+        {
+            transactionFilter = current_user.Trans;
+        }
+    }
+
+    private void ToggleSortByDate()
+    {
+        if (isSortAscending)
+        {
+            transactionFilter = transactionFilter
+                .OrderBy(t => DateTime.Parse(t.trans_date))
+                .ToList();
+        }
+        else
+        {
+            transactionFilter = transactionFilter
+                .OrderByDescending(t => DateTime.Parse(t.trans_date))
+                .ToList();
+        }
+
+        isSortAscending = !isSortAscending;
+    }
+
+    private void SearchByNote()
+    {
+        transactionFilter = current_user.Trans
+            .Where(t => string.IsNullOrEmpty(noteSearch) ||
+                        (t.trans_note?.IndexOf(noteSearch, StringComparison.OrdinalIgnoreCase) >= 0))
+            .ToList();
+    }
+
+    private void FilterByDateRange()
+    {
+        if (startDate.HasValue && endDate.HasValue)
+        {
+            transactionFilter = current_user.Trans
+               .Where(t => DateTime.TryParse(t.trans_date, out DateTime transactionDate)
+                         && transactionDate >= startDate.Value
+                         && transactionDate <= endDate.Value)
+                .ToList();
+        }
+        else
+        {
+            Message = "Please select both start and end dates.";
+        }
+    }
+
     private void ClearFields()
     {
-
+        Date = null;
         amount = "";
         type = "";
         tag = "";
         note = "";
     }
 }
+

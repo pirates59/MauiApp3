@@ -76,7 +76,7 @@
 
     protected override void OnInitialized()
     {
-        Users = UserService.LoadUserAccounts();
+        Users = UserService.UserAccounts();
     }
 
     private void Registers()
@@ -99,13 +99,13 @@
             {
                 userId = user_ID,
                 user_name = Username,
-                pass = UserService.GeneratePasswordHash(Password),
+                pass = UserService.HashPassword(Password),
                 email = Email,
                 Currency = currency,
             };
 
         Users.Add(newUser);
-        UserService.SaveUserAccounts(Users);
+        UserService.userAccount(Users);
 
         message = "Registration successful. Redirecting to login...";
         Task.Delay(2000).ContinueWith(_ => NavigationManager.NavigateTo("/"));

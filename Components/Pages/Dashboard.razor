@@ -5,6 +5,48 @@
 @using MauiApp3.Models
 
 <style>
+
+    .cards-contain {
+        display: flex;
+        margin-bottom: 20px;
+        width: 100%;
+    }
+
+    .card-filter {
+        background-color: rgba(50, 173, 230, 0.25);
+        margin-right: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+        width: 100%;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .styled-button {
+        background-color: #EC993D;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+
+        .styled-button:hover {
+            background-color: #D58233;
+        }
+
+    .content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+
+        .content label {
+            margin-right: 5px; /* Adds a small spacing between label and input */
+        }
+
     .container {
         width: 90%;
         margin: 20px auto;
@@ -21,7 +63,6 @@
         width: 23%;
         margin: 10px 0;
         border-radius: 3px;
-        box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.1);
         overflow: hidden;
     }
 
@@ -29,51 +70,28 @@
         padding: 10px;
         font-weight: bold;
         border: none;
-        background-color: inherit;
+        color: inherit;
     }
 
     .card-body {
         padding: 20px;
+        font-size: 20px;
+        font-weight: bold;
     }
 
     .card-title {
-        font-size: 24px;
+        font-size: 16px;
         font-weight: bold;
     }
 
     .total-card {
         background-color: rgba(50, 173, 230, 0.25);
-        color: white;
-    }
-
-    .income-card {
-        background-color: rgba(50, 173, 230, 0.25);
-        color: white;
-    }
-
-    .expense-card {
-        background-color: rgba(50, 173, 230, 0.25);
-        color: white;
-    }
-
-    .debts-card {
-        background-color: rgba(50, 173, 230, 0.25);
-        color: white;
-    }
-
-    .pending-debts-card {
-        background-color: rgba(50, 173, 230, 0.25);
-        color: white;
-    }
-
-    .cleared-debts-card {
-        background-color: rgba(50, 173, 230, 0.25);
-        color: white;
+        color: black;
     }
 
     .transactions-card {
         background-color: #6c757d;
-        color: white;
+        color: black;
     }
 
     .table-container {
@@ -91,31 +109,28 @@
         box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.1);
     }
 
-    table {
+    .table-style {
         width: 100%;
         border-collapse: collapse;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
-    th, td {
-        padding: 12px;
-        text-align: left;
-        border: 1px solid #ddd;
-        font-size: 1rem;
-    }
+        .table-style thead tr {
+            color: black;
+            text-align: left;
+        }
 
-    th {
-        background-color: rgba(50, 173, 230, 0.25);
-        color: white;
-        font-weight: bold;
-    }
+        .table-style th,
+        .table-style td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
 
+        .table-style tbody tr:hover {
+            background-color: #f1f1f1;
+        }
 
-    .table-wrapper:nth-child(2) th {
-        color: white;
-    }
-
-    .filter-dropdown {
+    .dropdown {
         margin-bottom: 10px;
         padding: 5px;
         font-size: 1rem;
@@ -124,7 +139,7 @@
     h3 {
         font-size: 1.8rem;
         margin-bottom: 15px;
-        color: white;
+        color: black;
     }
 </style>
 
@@ -132,58 +147,73 @@
 {
     <p>Welcome, @currentUser.user_name!</p>
 }
+<div class="cards-contain">
+ <div class="card-filter">
+    <div class="content">
+    <label for="start_date">Start Date:</label>
+    <input type="date" id="start_date" @bind="start_date" />
+
+    <label for="end_date">End Date:</label>
+    <input type="date" id="end_date" @bind="end_date" />
+
+    <button class="styled-button" @onclick="DateFilter">Filter</button>
+</div>
+</div>
+</div>
 
 <div class="container">
+    <!-- Cards Section -->
     <div class="row">
         <!-- Total Transactions Card -->
         <div class="card total-card">
-            <div class="card-header">Total Transactions</div>
             <div class="card-body">
-                <h5 class="card-title">@totalTransactions</h5>
+                Total Transactions
+                <h5 class="card-title">@totalTrans</h5>
             </div>
         </div>
 
         <!-- Total Amount Card -->
         <div class="card total-card">
-            <div class="card-header">Total Amount</div>
             <div class="card-body">
+                Total Amount
                 <h5 class="card-title">$@totalAmount</h5>
             </div>
         </div>
 
         <!-- Income Card -->
-        <div class="card income-card">
-            <div class="card-header">Cash Inflow</div>
+        <div class="card total-card">
             <div class="card-body">
-                <h5 class="card-title">$@totalIncome</h5>
+                Cash Inflow
+                <h5 class="card-title">$@totalInflow</h5>
             </div>
         </div>
 
         <!-- Expense Card -->
-        <div class="card expense-card">
-            <div class="card-header">Cash Outflow</div>
+        <div class="card total-card">
             <div class="card-body">
-                <h5 class="card-title">$@totalExpense</h5>
+                Cash Outflow
+                <h5 class="card-title">$@totalOutflow</h5>
             </div>
         </div>
     </div>
 
+    <!-- More Cards -->
     <div class="row">
-        <div class="card debts-card">
-            <div class="card-header">Debts</div>
+        <div class="card total-card">
             <div class="card-body">
-                <h5 class="card-title">$@totalDebts</h5>
+                Debts
+                <h5 class="card-title">$@totalDebt</h5>
             </div>
         </div>
-        <div class="card pending-debts-card">
-            <div class="card-header">Remaining Debts</div>
+        <div class="card total-card">
             <div class="card-body">
-                <h5 class="card-title">$@pendingDebts</h5>
+                Remaining Debts
+                <h5 class="card-title">$@pending_Debt</h5>
             </div>
         </div>
-        <div class="card cleared-debts-card">
-            <div class="card-header">Cleared Debt</div>
+        <div class="card total-card">
             <div class="card-body">
+                Cleared Debt
                 <h5 class="card-title">$@clearedDebts</h5>
             </div>
         </div>
@@ -194,12 +224,13 @@
         <!-- Transactions Table -->
         <div class="table-wrapper transactions-card">
             <h3>Transactions</h3>
-            <select @onchange="UpdateFilter" class="filter-dropdown">
+            <label for="typeFilter">Filter By Type:</label>
+            <select id="typeFilter" @onchange="FilterType" class="dropdown">
                 <option value="All">All</option>
-                <option value="Highest">Highest</option>
-                <option value="Lowest">Lowest</option>
+                <option value="Income">Income</option>
+                <option value="Expense">Expense</option>
             </select>
-            <table>
+            <table class="table-style">
                 <thead>
                     <tr>
                         <th>Date</th>
@@ -209,7 +240,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var transaction in filteredTransactions)
+                    @foreach (var transaction in filteredTrans)
                     {
                         <tr>
                             <td>@transaction.trans_date</td>
@@ -222,15 +253,16 @@
             </table>
         </div>
 
+
         <!-- Pending Debts Table -->
         <div class="table-wrapper">
             <h3>Pending Debts</h3>
-            <select @onchange="UpdateFilter" class="filter-dropdown">
+            <select @onchange="updateFilter" class="filter-dropdown">
                 <option value="All">All</option>
                 <option value="Highest">Highest</option>
                 <option value="Lowest">Lowest</option>
             </select>
-            <table>
+            <table class="table-style">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -255,77 +287,206 @@
 
 @code {
     private User? currentUser;
-    private int totalTransactions = 0;
+    private int totalTrans = 0;
     private int totalAmount = 0;
-    private int totalIncome = 0;
-    private int totalExpense = 0;
-    private int totalDebts = 0;
-    private int pendingDebts = 0;
+    private int totalInflow = 0;
+    private int totalOutflow = 0;
+    private int totalDebt = 0;
+    private int pending_Debt = 0;
     private int clearedDebts = 0;
-
-    private List<Transaction> filteredTransactions = new();
+    private string Message = "";
+    private DateTime? start_date;
+    private DateTime? end_date;
+    private List<Transaction> filteredTrans = new();
     private List<Debt> pendingDebtsList = new();
     private List<Debt> clearedDebtsList = new();
     private string currentFilter = "All";
 
     protected override void OnInitialized()
     {
+        UserData();
+    }
+
+    private void UserData()
+    {
         currentUser = UserService.GetLoggedInUser();
 
         if (currentUser != null)
         {
-            totalTransactions = currentUser.Trans.Count;
-
-            totalIncome = currentUser.Trans
-                .Where(t => t.trans_type == "Income")
-                .Sum(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0);
-
-            totalExpense = currentUser.Trans
-                .Where(t => t.trans_type == "Expense")
-                .Sum(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0);
-
-            totalDebts = currentUser.Debts
-                .Sum(d => int.TryParse(d.debt_amount, out var amount) ? amount : 0);
-
-            pendingDebts = currentUser.Debts
-                .Where(d => d.debt_status == "Pending")
-                .Sum(d => int.TryParse(d.debt_amount, out var amount) ? amount : 0);
-
-            clearedDebts = currentUser.Debts
-                .Where(d => d.debt_status == "Cleared")
-                .Sum(d => int.TryParse(d.debt_amount, out var amount) ? amount : 0);
-
-            totalAmount = totalIncome + pendingDebts - totalExpense;
-
-            filteredTransactions = currentUser.Trans.Take(5).ToList();
+            filteredTrans = currentUser.Trans.ToList();
             pendingDebtsList = currentUser.Debts.Where(d => d.debt_status == "Pending").ToList();
             clearedDebtsList = currentUser.Debts.Where(d => d.debt_status == "Cleared").ToList();
+            UpdateValues();
         }
     }
 
-    private void UpdateFilter(ChangeEventArgs e)
+    private void UpdateValues()
+    {
+        totalTrans = filteredTrans.Count;
+
+        totalInflow = filteredTrans
+            .Where(t => t.trans_type == "Income")
+            .Sum(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0);
+
+        totalOutflow = filteredTrans
+            .Where(t => t.trans_type == "Expense")
+            .Sum(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0);
+
+        totalDebt = pendingDebtsList
+            .Sum(d => int.TryParse(d.debt_amount, out var amount) ? amount : 0);
+
+        pending_Debt = pendingDebtsList
+            .Sum(d => int.TryParse(d.debt_amount, out var amount) ? amount : 0);
+
+        clearedDebts = clearedDebtsList
+            .Sum(d => int.TryParse(d.cleared_amount, out var amount) ? amount : 0);
+
+        totalAmount = totalInflow - totalOutflow + totalDebt;
+        StateHasChanged();
+    }
+    private void updateFilter(ChangeEventArgs e)
     {
         currentFilter = e.Value?.ToString() ?? "All";
 
         if (currentFilter == "Highest")
         {
-            filteredTransactions = currentUser?.Trans
+            filteredTrans = currentUser?.Trans
                 .OrderByDescending(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0)
                 .Take(5)
                 .ToList() ?? new List<Transaction>();
         }
         else if (currentFilter == "Lowest")
         {
-            filteredTransactions = currentUser?.Trans
+            filteredTrans = currentUser?.Trans
                 .OrderBy(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0)
                 .Take(5)
                 .ToList() ?? new List<Transaction>();
         }
         else
         {
-            filteredTransactions = currentUser?.Trans
+            filteredTrans = currentUser?.Trans
                 .Take(5)
                 .ToList() ?? new List<Transaction>();
+        }
+    }
+
+    private void AddDebt(int debtId, string receivedDate, string dueDate, int amount, string tag, string note, string source)
+    {
+        bool success = UserService.AddDebtTransaction(debtId, receivedDate, dueDate, amount.ToString(), tag, note, source);
+
+        if (success)
+        {
+            // Refresh data
+            UserData();
+            Message = "Debt added successfully!";
+        }
+        else
+        {
+            Message = "Failed to add debt.";
+        }
+    }
+
+    private void ClearDebt(Debt debt)
+    {
+        if (!int.TryParse(debt.debt_amount, out var debtAmount))
+        {
+            Message = "Invalid debt amount.";
+            return;
+        }
+
+        int remainingDebt = debtAmount;
+        int clearedAmount = 0;
+
+        var incomeTransactions = filteredTrans
+            .Where(t => t.trans_type == "Income" && int.TryParse(t.trans_amount, out _))
+            .OrderBy(t => DateTime.Parse(t.trans_date))
+            .ToList();
+
+        foreach (var transaction in incomeTransactions)
+        {
+            if (!int.TryParse(transaction.trans_amount, out var transactionAmount)) continue;
+
+            if (remainingDebt <= transactionAmount)
+            {
+                clearedAmount += remainingDebt;
+                transactionAmount -= remainingDebt;
+                transaction.trans_amount = transactionAmount.ToString();
+                remainingDebt = 0;
+                break;
+            }
+            else
+            {
+                clearedAmount += transactionAmount;
+                remainingDebt -= transactionAmount;
+                transaction.trans_amount = "0";
+            }
+        }
+
+        if (remainingDebt > 0)
+        {
+            Message = "Insufficient funds to clear the debt.";
+            return;
+        }
+
+        debt.cleared_amount = clearedAmount.ToString();
+        debt.debt_status = "Cleared";
+
+        bool debtUpdate = UserService.DebtDetails(debt);
+        bool transactionsUpdate = UserService.UpdatedTransactions(filteredTrans);
+
+        if (debtUpdate && transactionsUpdate)
+        {
+            // Refresh data
+            UserData();
+            Message = $"Debt of ${debtAmount} cleared successfully.";
+        }
+        else
+        {
+            Message = "Failed to clear debt. Please try again.";
+        }
+    }
+
+    private void FilterType(ChangeEventArgs e)
+    {
+        var selectedType = e.Value?.ToString();
+
+        if (!string.IsNullOrEmpty(selectedType) && selectedType != "All")
+        {
+            filteredTrans = currentUser?.Trans
+                .Where(t => t.trans_type == selectedType)
+                .ToList() ?? new List<Transaction>();
+        }
+        else
+        {
+            filteredTrans = currentUser?.Trans.ToList() ?? new List<Transaction>();
+        }
+
+        // Recalculate totals if needed
+        UpdateValues();
+    }
+
+
+    private void DateFilter()
+    {
+        if (start_date.HasValue && end_date.HasValue)
+        {
+            filteredTrans = currentUser?.Trans
+                .Where(t => DateTime.TryParse(t.trans_date, out var date) && date >= start_date && date <= end_date)
+                .ToList() ?? new List<Transaction>();
+
+            pendingDebtsList = currentUser?.Debts
+                .Where(d => d.debt_status == "Pending" && DateTime.TryParse(d.due_date, out var date) && date >= start_date && date <= end_date)
+                .ToList() ?? new List<Debt>();
+
+            clearedDebtsList = currentUser?.Debts
+                .Where(d => d.debt_status == "Cleared" && DateTime.TryParse(d.Date, out var date) && date >= start_date && date <= end_date)
+                .ToList() ?? new List<Debt>();
+
+            UpdateValues();
+        }
+        else
+        {
+            Message = "Please select valid start and end dates.";
         }
     }
 }

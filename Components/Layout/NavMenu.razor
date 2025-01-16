@@ -1,4 +1,8 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using MauiApp3.Services
+@inject UserService userService
+@inject NavigationManager NavigationManager
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <img src="image/logo.png" alt="Moneymate Logo" style="height: 50px;">
     </div>
@@ -42,4 +46,7 @@
         </div>
     </nav>
 </div>
+
+
+
 

@@ -10,56 +10,56 @@ namespace MauiApp3.Services
     {
         private static User? loggedinUser = null;
 
-        private static readonly string UserFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "DataStore", "Moneymate.json");
+        private static readonly string UserFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "DataStore", "Moneymate.json");
 
 
-        public List<User> LoadUserAccounts()
+        public List<User> UserAccounts()
         {
-            if (!File.Exists(UserFilePath))
+            if (!File.Exists(UserFile))
             {
                 return new List<User>();
 
             }
-            var jsonContent = File.ReadAllText(UserFilePath);
-            return JsonSerializer.Deserialize<List<User>>(jsonContent) ?? new List<User>();
+            var jsonFile = File.ReadAllText(UserFile);
+            return JsonSerializer.Deserialize<List<User>>(jsonFile) ?? new List<User>();
         }
 
-        public void SaveUserAccounts(List<User> userAccounts)
+        public void userAccount(List<User> user_accounts)
         {
-            var directoryPath = Path.GetDirectoryName(UserFilePath);
+            var directoryPath = Path.GetDirectoryName(UserFile);
             if (!Directory.Exists(directoryPath))
             {
                 Directory.CreateDirectory(directoryPath!);
             }
 
-            if (!File.Exists(UserFilePath))
+            if (!File.Exists(UserFile))
             {
-                File.WriteAllText(UserFilePath, "[]"); // Write an empty JSON array
+                File.WriteAllText(UserFile, "[]");
             }
-            var jsonContent = JsonSerializer.Serialize(userAccounts, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(UserFilePath, jsonContent);
+            var jsonContent = JsonSerializer.Serialize(user_accounts, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(UserFile, jsonContent);
         }
 
-        public string GeneratePasswordHash(string password)
+        public string HashPassword(string password)
         {
             using var sha256 = SHA256.Create();
-            var passwordBytes = Encoding.UTF8.GetBytes(password);
-            var passwordHash = sha256.ComputeHash(passwordBytes);
-            return Convert.ToBase64String(passwordHash);  // Return hashed password
+            var passBytes = Encoding.UTF8.GetBytes(password);
+            var Hashpassword = sha256.ComputeHash(passBytes);
+            return Convert.ToBase64String(Hashpassword);  
         }
 
-        public bool VerifyPassword(string inputPassword, string storedPasswordHash)
+        public bool PasswordVerification(string input_password, string storedPassword)
         {
-            var hashedInputPassword = GeneratePasswordHash(inputPassword);
-            return hashedInputPassword == storedPasswordHash;
+            var hashedInputPassword = HashPassword(input_password);
+            return hashedInputPassword == storedPassword;
         }
 
         public bool LoginService(string username, string password)
         {
-            var users = LoadUserAccounts();
-            var user = users.FirstOrDefault(u => u.user_name == username);
+            var Users = UserAccounts();
+            var user = Users.FirstOrDefault(u => u.user_name == username);
 
-            if (user != null && VerifyPassword(password, user.pass))
+            if (user != null && PasswordVerification(password, user.pass))
             {
 
                 loggedinUser = user;
@@ -67,6 +67,8 @@ namespace MauiApp3.Services
             }
             return false;
         }
+
+        
 
         public User? GetLoggedInUser()
         {
@@ -76,15 +78,16 @@ namespace MauiApp3.Services
 
         public bool addTransaction(Transaction transaction)
         {
-            loggedinUser.Trans.Add(transaction);
+      
 
-            var user = LoadUserAccounts();
-            var userId = user.FindIndex(u => u.user_name == loggedinUser.user_name);
+            var user = UserAccounts();
+            var userID = user.FindIndex(u => u.user_name == loggedinUser.user_name);
 
-            if (userId != -1)
+            if (userID != -1)
             {
-                user[userId] = loggedinUser;
-                SaveUserAccounts(user);
+                user[userID].Trans.Add(transaction);
+                userAccount(user);
+                loggedinUser = user[userID];
                 return true;
 
             }
@@ -99,22 +102,22 @@ namespace MauiApp3.Services
                 return false;
             }
 
-            var existingDebt = loggedinUser.Debts.FirstOrDefault(d => d.debt_id == debt_id);
-            if (existingDebt != null)
+            var existedDebt = loggedinUser.Debts.FirstOrDefault(d => d.debt_id == debt_id);
+            if (existedDebt != null)
             {
-                existingDebt.date = receivedDate;
-                existingDebt.due_date = dueDate;
-                existingDebt.debt_amount = amount;
-                existingDebt.source = sourceName;
-                existingDebt.debt_tag = debtTag;
-                existingDebt.debt_note = debtNote;
+                existedDebt.Date = receivedDate;
+                existedDebt.due_date = dueDate;
+                existedDebt.debt_amount = amount;
+                existedDebt.source = sourceName;
+                existedDebt.debt_tag = debtTag;
+                existedDebt.debt_note = debtNote;
             }
             else
             {
-                var newDebtTransaction = new Debt
+                var newTransaction = new Debt
                 {
                     debt_id = debt_id,
-                    date = receivedDate,
+                    Date = receivedDate,
                     due_date = dueDate,
                     debt_amount = amount,
                     debt_status = "Pending",
@@ -123,57 +126,58 @@ namespace MauiApp3.Services
                     debt_note = debtNote,
                 };
 
-                loggedinUser.Debts.Add(newDebtTransaction);
+                loggedinUser.Debts.Add(newTransaction);
             }
 
-            var users = LoadUserAccounts();
-            var userIndex = users.FindIndex(u => u.user_name == loggedinUser.user_name);
+            var Users = UserAccounts();
+            var Index = Users.FindIndex(u => u.user_name == loggedinUser.user_name);
 
-            if (userIndex != -1)
+            if (Index != -1)
             {
-                users[userIndex] = loggedinUser;
-                SaveUserAccounts(users);
+                Users[Index] = loggedinUser;
+                userAccount(Users);
                 return true;
             }
 
             return false;
         }
-        public bool SaveUpdatedTransactions(List<Transaction> transactions)
+        public bool UpdatedTransactions(List<Transaction> trans)
         {
             if (loggedinUser == null) return false;
 
-            var users = LoadUserAccounts();
-            var userIndex = users.FindIndex(u => u.user_name == loggedinUser.user_name);
+            var Users = UserAccounts();
+            var Index = Users.FindIndex(u => u.user_name == loggedinUser.user_name);
 
-            if (userIndex != -1)
+            if (Index != -1)
             {
-                users[userIndex].Trans = transactions;
+                Users[Index].Trans = trans;
 
-                SaveUserAccounts(users);
+                userAccount(Users);
                 return true;
             }
             return false;
         }
 
 
-        public bool UpdateDebtDetails(Debt updatedDebt)
+        public bool DebtDetails(Debt debtUpdated)
         {
             if (loggedinUser == null) return false;
 
-            var users = LoadUserAccounts();
-            var userIndex = users.FindIndex(u => u.user_name == loggedinUser.user_name);
+            var Users = UserAccounts();
+            var Index = Users.FindIndex(u => u.user_name == loggedinUser.user_name);
 
-            if (userIndex != -1)
+            if (Index != -1)
             {
-                var debtToUpdate = users[userIndex].Debts.FirstOrDefault(d => d.debt_id == updatedDebt.debt_id);
+                var debtUpdate = Users[Index].Debts.FirstOrDefault(d => d.debt_id == debtUpdated.debt_id);
 
-                if (debtToUpdate != null)
+                if (debtUpdate != null)
                 {
-                    debtToUpdate.debt_status = updatedDebt.debt_status;
-                    debtToUpdate.cleared_amount = updatedDebt.cleared_amount;
-                    debtToUpdate.debt_amount = updatedDebt.debt_amount;
+                    debtUpdate.debt_status = debtUpdated.debt_status;
+                    debtUpdate.cleared_amount = debtUpdated.cleared_amount;
+                    debtUpdate.debt_amount = debtUpdated.debt_amount;
 
-                    SaveUserAccounts(users);
+                    userAccount(Users);
+                    loggedinUser = Users[Index];
                     return true;
                 }
             }
@@ -181,10 +185,20 @@ namespace MauiApp3.Services
         }
 
 
+        public List<Transaction> UserTransactions()
+        {
+            var Users = UserAccounts();
+            var user = Users.FirstOrDefault(u => u.user_name == loggedinUser?.user_name);
 
 
+            if (user != null)
+            {
+                return user.Trans ?? new List<Transaction>();
+            }
+
+            return new List<Transaction>();
+        }
 
     }
-
-
 }
+

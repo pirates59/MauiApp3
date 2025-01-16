@@ -3,19 +3,28 @@
 @using MauiApp3.Services
 @inject UserService userService
 <style>
+
+    .cards-contain {
+        display: flex;
+        margin-bottom: 20px;
+        width: 100%;
+    }
+
     h3 {
         text-align: center;
         color: #333;
     }
 
-    .cards-container {
+    .content {
         display: flex;
-        margin-bottom: 20px;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 5px;
     }
 
     .card {
-        margin-right: 10px;
         background-color: rgba(50, 173, 230, 0.25);
+        margin-right: 10px;
         border: 1px solid #ddd;
         border-radius: 8px;
         padding: 10px;
@@ -23,42 +32,79 @@
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
-        .card p {
-            margin: 5px 0;
-            text-align: center;
-        }
 
-    .card-value {
+    .content img {
+        margin-bottom: 5px;
+    }
+
+
+    .card p {
+        margin: 5px 0;
+        color: black;
+        text-align: center;
+    }
+
+    .value {
         font-size: 1.2em;
         font-weight: bold;
         color: black;
         margin-top: 5px;
     }
 
-    .filter-container {
+    .container {
+        background-color: rgba(50, 173, 230, 0.25);
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 8px 10px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        margin: auto;
+        margin-top: 50px;
+        height: 100%;
+    }
+
+    .filter {
         display: flex;
         justify-content: space-between;
         margin-bottom: 20px;
         align-items: center;
     }
 
-    .tag-filter {
+    .tag {
         margin-right: 10px;
     }
 
     .search-container {
         display: flex;
         align-items: center;
-        justify-content: flex-end;
     }
 
-        .search-container label {
-            margin-right: 10px;
+    .search-input {
+        flex: 1;
+        border: none;
+        outline: none;
+        background: transparent;
+        padding: 5px;
+        font-size: 16px;
+    }
+
+    .search-button {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .search-button img {
+            height: 18px;
+            width: 18px;
         }
+
 
     .styled-button {
         background-color: rgba(50, 173, 230, 0.25);
-        color: white;
+        color: black;
         border: none;
         padding: 4px;
         border-radius: 5px;
@@ -66,161 +112,217 @@
         transition: background-color 0.3s ease;
     }
 
-        .styled-button:hover {
-            background-color: #1d7b6e;
-        }
 
-    .styled-table {
+    .table-style {
         width: 100%;
         border-collapse: collapse;
         margin-top: 20px;
     }
 
-        .styled-table thead tr {
-            background-color: rgba(50, 173, 230, 0.25);
-            color: #fff;
+        .table-style thead tr {
+            color: black;
             text-align: left;
         }
 
-        .styled-table th, .styled-table td {
+        .table-style th, .table-style td {
             padding: 10px;
             border: 1px solid #ddd;
         }
 
-        .styled-table tbody tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
 
-        .styled-table tbody tr:hover {
+        .table-style tbody tr:hover {
             background-color: #f1f1f1;
         }
 
-    .no-data {
+    .data {
         text-align: center;
-        font-style: italic;
         color: #888;
         margin-top: 20px;
     }
 </style>
-
-<div class="cards-container">
+<div class="cards-contain">
     <div class="card">
-        <p><strong>Total Inflows:</strong></p>
-        <p class="card-value">@totalIncome</p>
-    </div>
-
-</div>
-
-<div class="filter-container">
-    <div class="tag-filter">
-        <label for="tagFilter">Filter by Tag:</label>
-        <select id="tagFilter" @onchange="FilterByTag">
-            <option value="">All</option>
-            @foreach (var tag in incomeTransactions.Select(t => t.trans_tag).Distinct())
-            {
-                <option value="@tag">@tag</option>
-            }
-        </select>
-    </div>
-    <div class="search-container">
-        <label for="noteSearch">Search by Note:</label>
-        <input type="text" id="noteSearch" @bind="noteSearch" />
-        <button class="styled-button" @onclick="SearchByNote">Search</button>
+        <div class="content">
+            <img src="image/Income.png" alt="Expense Logo" style="height: 22px; width:22px">
+            <p><strong>Total Inflows</strong></p>
+            <p class="value">$@Income</p>
+        </div>
     </div>
 </div>
-@if (filteredTransactions.Any())
-{
-    <table class="styled-table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Tag</th>
-                <th>Note</th>
-                <th>Type</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var transaction in incomeTransactions)
-            {
+
+<div class="filter">
+    <label for="startDate">Start Date:</label>
+    <input type="date" id="startDate" @bind="startDate" />
+
+    <label for="endDate">End Date:</label>
+    <input type="date" id="endDate" @bind="endDate" />
+
+    <button class="styled-button" @onclick="FilterByDateRange">Filter by Date Range</button>
+
+    <select @onchange="UpdateFilter" class="filter-dropdown">
+        <option value="All">All</option>
+        <option value="Highest">Highest</option>
+        <option value="Lowest">Lowest</option>
+    </select>
+</div>
+
+<div class="container">
+    <div class="filter">
+        <div class="tag">
+            <label for="Filter">Filter by Tag:</label>
+            <select id="Filter" @onchange="FilterTag">
+                <option value="">All</option>
+                @foreach (var tag in incomeTrans.Select(t => t.trans_tag).Distinct())
+                {
+                    <option value="@tag">@tag</option>
+                }
+            </select>
+        </div>
+        <div class="search-container">
+            <input type="text" id="notes" placeholder="Search by note" @bind="notes" />
+            <button class="search-button" @onclick="SearchNote">
+                <img src="image/search.png" alt="Search" />
+            </button>
+        </div>
+    </div>
+
+    @if (filterTrans.Any())
+    {
+        <table class="table-style">
+            <thead>
                 <tr>
-                    <td>@transaction.trans_date</td>
-                    <td>@transaction.trans_amount</td>
-                    <td>@transaction.trans_tag</td>
-                    <td>@transaction.trans_note</td>
-                    <td>@transaction.trans_type</td>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Tag</th>
+                    <th>Note</th>
+                    <th>Type</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-}
-else
-{
-    <p class="no-data">No income transactions found.</p>
-}
-
-
+            </thead>
+            <tbody>
+                @foreach (var transaction in filterTrans)
+                {
+                    <tr>
+                        <td>@transaction.trans_date</td>
+                        <td>$@transaction.trans_amount</td>
+                        <td>@transaction.trans_tag</td>
+                        <td>@transaction.trans_note</td>
+                        <td>@transaction.trans_type</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p class="data">No income transactions found.</p>
+    }
+</div>
 
 @code {
-    private List<Transaction> incomeTransactions = new List<Transaction>();
-    private List<Transaction> filteredTransactions = new List<Transaction>();
-    private int totalIncome = 0;
-    private int averageIncome = 0;
-    private string noteSearch = string.Empty;
-
-
+    private List<Transaction> incomeTrans = new();
+    private List<Transaction> filterTrans = new();
+    private int Income = 0;
+      private bool isSortAscending = true;
+    private DateTime? startDate;
+    private DateTime? endDate;
+    private string currentFilter = "All";
+    private string notes = string.Empty;
 
     protected override void OnInitialized()
     {
-        var Users = userService.LoadUserAccounts();
+        LoadUserData();
+    }
+
+    private void LoadUserData()
+    {
         var loggedInUser = userService.GetLoggedInUser();
-
-
         if (loggedInUser != null)
         {
-            // Find the current user in the loaded users list
-            var currentUser = Users.FirstOrDefault(u => u.userId == loggedInUser.userId);
+            incomeTrans = loggedInUser.Trans
+                .Where(t => t.trans_type == "Income")
+                .ToList();
 
-            if (currentUser != null)
-            {
-                incomeTransactions = currentUser.Trans
-                   .Where(t => t.trans_type == "Income")
-                   .ToList();
+            filterTrans = incomeTrans;
 
-                filteredTransactions = incomeTransactions;
-
-                totalIncome = incomeTransactions
-                 .Sum(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0);
-
-                // Calculate average income
-                averageIncome = incomeTransactions.Any()
-                    ? totalIncome / incomeTransactions.Count
-                    : 0;
-            }
+            Income = incomeTrans
+                .Sum(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0);
         }
     }
-    private void FilterByTag(ChangeEventArgs e)
+
+    private void UpdateFilter(ChangeEventArgs e)
+    {
+        currentFilter = e.Value?.ToString() ?? "All";
+
+        if (currentFilter == "Highest")
+        {
+            filterTrans = incomeTrans
+                .OrderByDescending(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0)
+                .Take(5)
+                .ToList();
+        }
+        else if (currentFilter == "Lowest")
+        {
+            filterTrans = incomeTrans
+                .OrderBy(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0)
+                .Take(5)
+                .ToList();
+        }
+        else
+        {
+            filterTrans = incomeTrans;
+        }
+    }
+
+    private void FilterByDateRange()
+    {
+        if (startDate.HasValue && endDate.HasValue)
+        {
+            filterTrans = incomeTrans
+                .Where(t => DateTime.TryParse(t.trans_date, out var date) && date >= startDate && date <= endDate)
+                .ToList();
+
+            Income = filterTrans
+                .Sum(t => int.TryParse(t.trans_amount, out var amount) ? amount : 0);
+        }
+        else
+        {
+            filterTrans = incomeTrans;
+        }
+    }
+
+    private void ToggleSortByDate()
+    {
+        if (isSortAscending)
+        {
+            filterTrans = filterTrans.OrderBy(t => DateTime.Parse(t.trans_date)).ToList();
+        }
+        else
+        {
+            filterTrans = filterTrans.OrderByDescending(t => DateTime.Parse(t.trans_date)).ToList();
+        }
+        isSortAscending = !isSortAscending;
+    }
+
+    private void FilterTag(ChangeEventArgs e)
     {
         var selectedTag = e.Value?.ToString();
         if (!string.IsNullOrEmpty(selectedTag))
         {
-            filteredTransactions = incomeTransactions
+            filterTrans = incomeTrans
                 .Where(t => t.trans_tag == selectedTag)
                 .ToList();
         }
         else
         {
-            filteredTransactions = incomeTransactions;
+            filterTrans = incomeTrans;
         }
     }
 
-    private void SearchByNote()
+    private void SearchNote()
     {
-        filteredTransactions = incomeTransactions
-            .Where(t => string.IsNullOrEmpty(noteSearch) ||
-                        (t.trans_note?.IndexOf(noteSearch, StringComparison.OrdinalIgnoreCase) >= 0))
+        filterTrans = incomeTrans
+            .Where(t => string.IsNullOrEmpty(notes) ||
+                        t.trans_note?.IndexOf(notes, StringComparison.OrdinalIgnoreCase) >= 0)
             .ToList();
     }
-
 }
-
