@@ -2,7 +2,8 @@
 @using MauiApp3.Models
 @using MauiApp3.Services
 @inject UserService userService
-
+@inject IJSRuntime JSRuntime
+@using System.Text
 <style>
     /* Styling for container of cards */
     .cards-contain {
@@ -238,6 +239,10 @@
             </select>
         </div>
         <div class="search-container">
+           
+            <button class="search-button" @onclick="ExportToCsv">
+                <img src="image/share.png" alt="Share" style="height: 30px; width: 30px; margin-left:25px;margin-top:8px;" />
+            </button>
             <input type="text" id="notes" placeholder="Search by note" @bind="notes" />
             <button class="search-button" @onclick="SearchNote">
                 <img src="image/search.png" alt="Search" />
@@ -391,6 +396,31 @@
             filterTrans = expenseTrans;
         }
     }
+
+    private async Task ExportToCsv()
+    {
+        var csvContent = new StringBuilder();
+        csvContent.AppendLine("Type,Amount,Date,Tag,Note");
+
+        // Iterate through filtered transactions and append data
+        foreach (var transaction in filterTrans)
+        {
+            csvContent.AppendLine($"{transaction.trans_type}," +
+                                  $"{transaction.trans_amount}," +
+                                  $"{transaction.trans_date}," +
+                                  $"{transaction.trans_tag}," +
+                                  $"{transaction.trans_note}");
+        }
+
+        // File details
+        var fileName = "Filtered_Outflows.csv";
+        var fileBytes = Encoding.UTF8.GetBytes(csvContent.ToString());
+        var fileBase64 = Convert.ToBase64String(fileBytes);
+
+        // Trigger file download in browser
+        await JSRuntime.InvokeVoidAsync("downloadFile", fileName, fileBase64);
+    }
+
 
     // Method to filter transactions by note content
     private void SearchNote()

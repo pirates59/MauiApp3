@@ -33,7 +33,7 @@ namespace MauiApp3.Models
         // The source from which the debt originated (e.g., "Bank", "Individual")
         public string source { get; set; }
 
-        // Additional notes regarding the debt (e.g., reason for debt, terms, etc.)
+        // Additional notes regarding the debt 
         public string debt_note { get; set; }
     }
 }

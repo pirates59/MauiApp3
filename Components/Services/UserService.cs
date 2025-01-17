@@ -41,7 +41,7 @@ namespace MauiApp3.Services
             File.WriteAllText(UserFile, jsonContent); // Save serialized data to the file
         }
 
-        // Hashes the given password using SHA256
+        // Hashes the given password 
         public string HashPassword(string password)
         {
             using var sha256 = SHA256.Create(); // Create an instance of SHA256
